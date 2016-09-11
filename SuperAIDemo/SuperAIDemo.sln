@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperAIDemo.CSharp.Plugins", "SuperAIDemo.CSharp.Plugins.csproj", "{EDA1A1D6-FC49-B679-AD06-1B8E3617A4D0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperAIDemo.CSharp", "SuperAIDemo.CSharp.csproj", "{64B6156E-5428-7B58-9937-249DBAB90C3F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperAIDemo.CSharp.Editor", "SuperAIDemo.CSharp.Editor.csproj", "{E476B92F-9E06-02CD-BF1E-172DC65CB263}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{EDA1A1D6-FC49-B679-AD06-1B8E3617A4D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EDA1A1D6-FC49-B679-AD06-1B8E3617A4D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EDA1A1D6-FC49-B679-AD06-1B8E3617A4D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EDA1A1D6-FC49-B679-AD06-1B8E3617A4D0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64B6156E-5428-7B58-9937-249DBAB90C3F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64B6156E-5428-7B58-9937-249DBAB90C3F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64B6156E-5428-7B58-9937-249DBAB90C3F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64B6156E-5428-7B58-9937-249DBAB90C3F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E476B92F-9E06-02CD-BF1E-172DC65CB263}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E476B92F-9E06-02CD-BF1E-172DC65CB263}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E476B92F-9E06-02CD-BF1E-172DC65CB263}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E476B92F-9E06-02CD-BF1E-172DC65CB263}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
