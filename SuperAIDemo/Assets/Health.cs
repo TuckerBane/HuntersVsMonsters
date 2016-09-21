@@ -1,13 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Runtime.InteropServices;
+using MessageTypes;
 
 public enum DamageType { Fire = 0, Ice, Bludgeoning, Piercing };
 
 
 public class Health : MonoBehaviour {
 
-    public int m_health = 10;
+    public float m_health = 10;
 
     public class DamageModifiers
     {
@@ -42,20 +43,26 @@ public class Health : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-	
+        // probably don't need this
+// 	    if (m_health <= 0.001)
+//         {
+//             gameObject.SendMessage("DeathMessage");
+//         }
+
 	}
 
-    void TakeDamage(DamageType type, int amount)
+    void TakeDamage(DamageMessage message)
     {
-        if ((int) type > 4 || type < 0)
+        if ((int) message.type > 4 || message.type < 0)
         {
             Debug.Log("Invalid damage type");
         }
-        amount += GetDamageModifier(type);
-        if (amount < 0)
+        //TODO use damage modifiers
+        //message.amount += GetDamageModifier(message.type);
+        if (message.amount < 0)
             return;
-        m_health -= amount;
+        m_health -= message.amount;
         if (m_health <= 0)
-            Destroy(gameObject);
+            gameObject.SendMessage("DeathMessage");
     }
 }
