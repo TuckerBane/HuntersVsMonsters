@@ -69,8 +69,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\Attack.cs" />
-    <Compile Include="Assets\DestroyOnUse.cs" />
     <Compile Include="Assets\FFDevelopment\Design\FFAction.cs" />
     <Compile Include="Assets\FFDevelopment\Design\FFComponent.cs" />
     <Compile Include="Assets\FFDevelopment\Design\FFGameObject.cs" />
@@ -109,18 +107,20 @@
     <Compile Include="Assets\FFDevelopment\System\FFMessageSystem.cs" />
     <Compile Include="Assets\FFDevelopment\System\FFSystem.cs" />
     <Compile Include="Assets\FFDevelopment\____ReadMe____.cs" />
-    <Compile Include="Assets\FollowFFPath.cs" />
-    <Compile Include="Assets\GoUpTestScript.cs" />
-    <Compile Include="Assets\GrowOnSpawn.cs" />
-    <Compile Include="Assets\Health.cs" />
-    <Compile Include="Assets\HideSpriteInGame.cs" />
-    <Compile Include="Assets\Inventory.cs" />
-    <Compile Include="Assets\MessageTypes.cs" />
-    <Compile Include="Assets\NevMeshTest.cs" />
-    <Compile Include="Assets\OverheadIconManager.cs" />
-    <Compile Include="Assets\Pickupable.cs" />
-    <Compile Include="Assets\PlayerUseObject.cs" />
-    <Compile Include="Assets\Spawner.cs" />
+    <Compile Include="Assets\MiscGameplay\Attack.cs" />
+    <Compile Include="Assets\MiscGameplay\DestroyOnUse.cs" />
+    <Compile Include="Assets\MiscGameplay\FollowFFPath.cs" />
+    <Compile Include="Assets\MiscGameplay\GoUpTestScript.cs" />
+    <Compile Include="Assets\MiscGameplay\GrowOnSpawn.cs" />
+    <Compile Include="Assets\MiscGameplay\Health.cs" />
+    <Compile Include="Assets\MiscGameplay\HideSpriteInGame.cs" />
+    <Compile Include="Assets\MiscGameplay\Inventory.cs" />
+    <Compile Include="Assets\MiscGameplay\MessageTypes.cs" />
+    <Compile Include="Assets\MiscGameplay\NevMeshTest.cs" />
+    <Compile Include="Assets\MiscGameplay\OverheadIconManager.cs" />
+    <Compile Include="Assets\MiscGameplay\Pickupable.cs" />
+    <Compile Include="Assets\MiscGameplay\PlayerUseObject.cs" />
+    <Compile Include="Assets\MiscGameplay\Spawner.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\FreeCharacter\TestingComputeShader.compute" />
