@@ -13,6 +13,24 @@ public class Inventory : MonoBehaviour
 
     }
 
+    public int CountOf(CraftingComponent comp)
+    {
+        int count = 0;
+        foreach(GameObject invObj in m_objectStore)
+        {
+            CraftingComponent compycomp = invObj.GetComponent<CraftingComponent>();
+            if (compycomp == null)
+                continue;
+            if (compycomp.m_craftingName == comp.m_craftingName)
+                ++count;
+        }
+        return count;
+    }
+
+    public void PlaceObject(GameObject obj)
+    {
+        obj.GetComponent<Transform>().position = GetComponent<Transform>().position + (GetComponent<Transform>().rotation * Vector3.forward * m_objectPlaceDistance);
+    }
     // Update is called once per frame
     void Update()
     {
@@ -34,16 +52,31 @@ public class Inventory : MonoBehaviour
                     return;
 
                 placedObject.SetActive(true);
-                placedObject.GetComponent<Transform>().position = GetComponent<Transform>().position + (GetComponent<Transform>().rotation * Vector3.forward * m_objectPlaceDistance);
+                PlaceObject(placedObject);
                 m_objectStore.RemoveAt(m_objectStore.Count - 1);
             }
         }
 
     }
 
-    void AddToInventory(GameObject obj)
+    public void AddToInventory(GameObject obj)
     {
         m_objectStore.Add(obj);
         obj.SetActive(false);
+    }
+
+    public void RemoveFromInventory(CraftingComponent comp)
+    {
+        foreach (GameObject invObj in m_objectStore)
+        {
+            CraftingComponent compycomp = invObj.GetComponent<CraftingComponent>();
+            if (compycomp == null)
+                continue;
+            if (compycomp.m_craftingName == comp.m_craftingName)
+            {
+                m_objectStore.Remove(invObj);
+                return;
+            }
+        }
     }
 }

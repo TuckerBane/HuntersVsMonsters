@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+[System.Serializable]
 public class CraftingRecipe
 {
     public GameObject m_createdObjectPrefab;
@@ -15,10 +16,47 @@ public class CraftingSystem : MonoBehaviour {
 
     public GameObject[] m_baseMaterials;
     public CraftingRecipe[] m_recipes;
-    public CraftingRecipe m_testing;
-    public int i;
-	// Use this for initialization
-	void Start () {
+    public int m_recipeToMake;
+
+    void PlayerUseObject(GameObject player)
+    {
+        
+        Inventory playersInventory = player.GetComponent<Inventory>();
+        GameObject craftingResult = TryToCraft(playersInventory, m_recipeToMake);
+        if (craftingResult == null) // crafting failed
+        {
+            Debug.Log("Crafting attempt failed");
+            ++m_recipeToMake;
+            m_recipeToMake = m_recipeToMake % m_recipes.Length; // loop through recipes
+            return;
+        }
+        playersInventory.PlaceObject(craftingResult);
+    }
+
+
+    GameObject TryToCraft(Inventory materialSource, int recipeIndex)
+    {
+        CraftingRecipe recipe = m_recipes[recipeIndex];
+        List<int> indexesofMaterialsToExpend = new List<int>();
+        for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
+        {
+            GameObject component = recipe.m_craftingComponents[i];
+            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
+                return null; // material missing, could not craft
+        }
+        // TODO make this less super slow
+        for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
+        {
+            GameObject component = recipe.m_craftingComponents[i];
+            materialSource.RemoveFromInventory(component.GetComponent<CraftingComponent>());
+        }
+
+
+        return Instantiate(recipe.m_createdObjectPrefab);
+    }
+
+        // Use this for initialization
+        void Start () {
 	
 	}
 	
