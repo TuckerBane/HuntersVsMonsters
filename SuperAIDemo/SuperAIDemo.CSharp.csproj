@@ -107,6 +107,7 @@
     <Compile Include="Assets\FFDevelopment\System\FFMessageSystem.cs" />
     <Compile Include="Assets\FFDevelopment\System\FFSystem.cs" />
     <Compile Include="Assets\FFDevelopment\____ReadMe____.cs" />
+    <Compile Include="Assets\Scripts\Crafting\CraftingSystem.cs" />
     <Compile Include="Assets\Scripts\MiscGameplay\Attack.cs" />
     <Compile Include="Assets\Scripts\MiscGameplay\DestroyOnUse.cs" />
     <Compile Include="Assets\Scripts\MiscGameplay\FollowFFPath.cs" />
