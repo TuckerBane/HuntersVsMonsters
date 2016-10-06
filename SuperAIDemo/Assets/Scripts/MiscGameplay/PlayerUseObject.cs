@@ -20,7 +20,7 @@ public class PlayerUseObject : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Return))
         {
-            col.gameObject.SendMessage("PlayerUseObject", gameObject ,SendMessageOptions.DontRequireReceiver);
+            col.gameObject.transform.root.SendMessage("PlayerUseObject", gameObject ,SendMessageOptions.DontRequireReceiver);
         }
     }
 }
