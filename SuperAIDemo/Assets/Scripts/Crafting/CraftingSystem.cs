@@ -32,11 +32,13 @@ public class CraftingSystem : MonoBehaviour {
         }
         playersInventory.PlaceObject(craftingResult);
     }
-
-
     GameObject TryToCraft(Inventory materialSource, int recipeIndex)
     {
-        CraftingRecipe recipe = m_recipes[recipeIndex];
+        return TryToCraft(materialSource, m_recipes[recipeIndex]);
+    }
+
+    public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe)
+    {
         List<int> indexesofMaterialsToExpend = new List<int>();
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
@@ -53,6 +55,20 @@ public class CraftingSystem : MonoBehaviour {
 
 
         return Instantiate(recipe.m_createdObjectPrefab);
+    }
+
+    public CraftingRecipe GetRecipe(GameObject recipeTarget)
+    {
+        CraftingComponent target = recipeTarget.GetComponent<CraftingComponent>();
+        foreach (CraftingRecipe rec in m_recipes)
+        {
+            if (target.name == rec.m_createdObjectPrefab.GetComponent<CraftingComponent>().name)
+            {
+                return rec;
+            }
+        }
+
+        return null;
     }
 
         // Use this for initialization

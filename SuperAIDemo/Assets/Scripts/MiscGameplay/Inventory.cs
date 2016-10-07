@@ -31,6 +31,28 @@ public class Inventory : MonoBehaviour
     {
         obj.GetComponent<Transform>().position = GetComponent<Transform>().position + (GetComponent<Transform>().rotation * Vector3.forward * m_objectPlaceDistance);
     }
+
+    public void PlaceObject()
+    {
+        if (m_objectStore.Count != 0)
+        {
+            GameObject placedObject = m_objectStore[m_objectStore.Count - 1];
+            while (m_objectStore.Count != 0 && !placedObject)
+            {
+                m_objectStore.RemoveAt(m_objectStore.Count - 1);
+                if (m_objectStore.Count != 0)
+                    placedObject = m_objectStore[m_objectStore.Count - 1];
+            }
+            // TODO: put this in a function
+            if (!placedObject)
+                return;
+
+            placedObject.SetActive(true);
+            PlaceObject(placedObject);
+            m_objectStore.RemoveAt(m_objectStore.Count - 1);
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
@@ -38,23 +60,7 @@ public class Inventory : MonoBehaviour
         // return object from inventory
         if (Input.GetKeyDown(KeyCode.P))
         {
-            if (m_objectStore.Count != 0)
-            {
-                GameObject placedObject = m_objectStore[m_objectStore.Count - 1];
-                while (m_objectStore.Count != 0 && !placedObject)
-                {
-                    m_objectStore.RemoveAt(m_objectStore.Count - 1);
-                    if (m_objectStore.Count != 0)
-                        placedObject = m_objectStore[m_objectStore.Count - 1];
-                }
-                // TODO: put this in a function
-                if (!placedObject)
-                    return;
-
-                placedObject.SetActive(true);
-                PlaceObject(placedObject);
-                m_objectStore.RemoveAt(m_objectStore.Count - 1);
-            }
+            PlaceObject();
         }
 
     }
