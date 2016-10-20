@@ -3,20 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
+public class ComponentAndCount
+{
+    public GameObject comp;
+    public int numberNeeded = 1;
+}
+
+[System.Serializable]
 public class CraftingRecipe
 {
     public GameObject m_createdObjectPrefab;
-    public List<GameObject> m_craftingComponents;
+    public List<ComponentAndCount> m_craftingComponents;
     // optional recipe components
     public float m_time = 0.0f;
-    public GameObject[] m_required_tools;
+    public List<GameObject> m_required_tools;
 }
 
 public class CraftingSystem : MonoBehaviour {
 
-    public GameObject[] m_baseMaterials;
+    public GameObject[] m_baseMaterialPrefabs;
     public CraftingRecipe[] m_recipes;
     public int m_recipeToMake;
+
 
     void PlayerUseObject(GameObject player)
     {
@@ -40,19 +48,26 @@ public class CraftingSystem : MonoBehaviour {
     public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe)
     {
         List<int> indexesofMaterialsToExpend = new List<int>();
-        for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
+        for (int i = 0; i < recipe.m_required_tools.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i];
+            GameObject component = recipe.m_required_tools[i];
             if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
                 return null; // material missing, could not craft
         }
+
+        for (int i = 0; i < recipe.m_required_tools.Count; ++i)
+        {
+            GameObject component = recipe.m_required_tools[i];
+            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
+                return null; // material missing, could not craft
+        }
+
         // TODO make this less super slow
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i];
+            GameObject component = recipe.m_craftingComponents[i].comp;
             materialSource.RemoveFromInventory(component.GetComponent<CraftingComponent>());
         }
-
 
         return Instantiate(recipe.m_createdObjectPrefab);
     }
