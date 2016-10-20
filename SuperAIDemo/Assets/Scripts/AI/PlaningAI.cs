@@ -37,12 +37,14 @@ public class PlaningAI : MonoBehaviour {
     public RecipeNode m_goalRootNode;
     private CraftingSystem m_craftingSystem;
     private ActionList m_myActions;
+    private CraftingAIGlobals m_globals;
     
 
 	// Use this for initialization
 	void Start () {
         m_craftingSystem = FindObjectOfType<CraftingSystem>();
         m_myActions = GetComponent<ActionList>();
+        
         MakePlan();
 	}
 
@@ -72,9 +74,9 @@ public class PlaningAI : MonoBehaviour {
 	
     void ExtendRecipeChain(RecipeNode recipe)
     {
-        foreach(GameObject component in recipe.m_recipe.m_craftingComponents)
+        foreach(ComponentAndCount componentCount in recipe.m_recipe.m_craftingComponents)
         { 
-            CraftingRecipe newRecipe = m_craftingSystem.GetRecipe(component);
+            CraftingRecipe newRecipe = m_craftingSystem.GetRecipe(componentCount.comp.gameObject);
 
             if (newRecipe != null)
             {
@@ -103,7 +105,17 @@ public class PlaningAI : MonoBehaviour {
             {
                 // add go get base component to action list
                 // HACK find by crafting name instead. Ideally, use vision or something, but probably not.
-                GameObject goalObject = GameObject.Find(component.name);
+                string craftingName = componentCount.comp.GetComponent<CraftingComponent>().m_craftingName;
+                List<CraftingComponent> goalObjs = CraftingAIGlobals.m_craftingComponents[craftingName];
+                if (goalObjs == null || goalObjs.Count == 0)
+                {
+                    Debug.Log("Crafting component not found");
+                    return; // no plan for getting this because it doesn't exist :(
+                }
+
+                // TODO choose the closest object instead
+                GameObject goalObject = goalObjs[0].gameObject;
+
                 GoSomewhere go = new GoSomewhere();
                 go.m_destination = goalObject.transform.position;
                 m_myActions.m_list.Add(go);
