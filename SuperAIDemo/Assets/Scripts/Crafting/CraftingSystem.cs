@@ -9,7 +9,7 @@ public class CraftingRecipe
     public List<GameObject> m_craftingComponents;
     // optional recipe components
     public float m_time = 0.0f;
-    public GameObject[] m_required_tools;
+    public List<GameObject> m_required_tools;
 }
 
 public class CraftingSystem : MonoBehaviour {
@@ -40,6 +40,15 @@ public class CraftingSystem : MonoBehaviour {
     public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe)
     {
         List<int> indexesofMaterialsToExpend = new List<int>();
+
+        for (int i = 0; i < recipe.m_required_tools.Count; ++i)
+        {
+            GameObject component = recipe.m_required_tools[i];
+            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
+                return null; // material missing, could not craft
+        }
+
+
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
             GameObject component = recipe.m_craftingComponents[i];
