@@ -3,14 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 
 [System.Serializable]
+public class ComponentAndCount
+{
+    public CraftingComponent component;
+    public int count = 1;
+}
+
+[System.Serializable]
 public class CraftingRecipe
 {
     public GameObject m_createdObjectPrefab;
-    public List<GameObject> m_craftingComponents;
+    public List<ComponentAndCount> m_craftingComponents;
     // optional recipe components
     public float m_time = 0.0f;
-    public List<GameObject> m_required_tools;
+    public List<CraftingComponent> m_required_tools;
 }
+
 
 public class CraftingSystem : MonoBehaviour {
 
@@ -43,23 +51,23 @@ public class CraftingSystem : MonoBehaviour {
 
         for (int i = 0; i < recipe.m_required_tools.Count; ++i)
         {
-            GameObject component = recipe.m_required_tools[i];
-            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
-                return null; // material missing, could not craft
+            CraftingComponent component = recipe.m_required_tools[i];
+            if (materialSource.CountOf(component) == 0)
+                return null; // tool missing, could not craft
         }
 
 
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i];
+            GameObject component = recipe.m_craftingComponents[i].component.gameObject;
             if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
                 return null; // material missing, could not craft
         }
         // TODO make this less super slow
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i];
-            materialSource.RemoveFromInventory(component.GetComponent<CraftingComponent>());
+            GameObject component = recipe.m_craftingComponents[i].component.gameObject;
+            materialSource.DeleteFromInventory(component.GetComponent<CraftingComponent>());
         }
 
 

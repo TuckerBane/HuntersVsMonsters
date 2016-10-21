@@ -17,4 +17,11 @@ public class CraftingAIGlobals : MonoBehaviour {
     {
         m_craftingComponents[comp.m_craftingName].Remove(comp);
     }
+
+    public static GameObject GetClosest(CraftingComponent comp, GameObject you)
+    {
+        //ToDo get the closest
+        return m_craftingComponents[comp.m_craftingName][0].gameObject;
+    }
+
 }

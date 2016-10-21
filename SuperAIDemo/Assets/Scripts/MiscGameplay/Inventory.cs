@@ -9,9 +9,7 @@ public class Inventory : MonoBehaviour
     public float m_objectPlaceDistance;
     // Use this for initialization
     void Start()
-    {
-
-    }
+    {}
 
     public int CountOf(CraftingComponent comp)
     {
@@ -71,7 +69,7 @@ public class Inventory : MonoBehaviour
         obj.SetActive(false);
     }
 
-    public void RemoveFromInventory(CraftingComponent comp)
+    public void DeleteFromInventory(CraftingComponent comp)
     {
         foreach (GameObject invObj in m_objectStore)
         {
@@ -80,7 +78,9 @@ public class Inventory : MonoBehaviour
                 continue;
             if (compycomp.m_craftingName == comp.m_craftingName)
             {
+                GameObject toDelete = invObj;
                 m_objectStore.Remove(invObj);
+                Destroy(toDelete);
                 return;
             }
         }

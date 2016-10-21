@@ -5,13 +5,21 @@ using System.Collections.Generic;
 public class Action
 {
     // returns true if the action is complete
-    public virtual bool DoAction(GameObject actor){ return true; }
+    public virtual bool DoAction(GameObject actor) { return true; }
 }
+
+#region BasicActions
 
 public class GoSomewhere : Action
 {
+    public GoSomewhere() { }
+    public GoSomewhere(Vector3 destination)
+    {
+        m_destination = destination;
+    }
+
     public Vector3 m_destination = new Vector3(0,0,0);
-    public float m_speed = 10.0f;
+    public float m_speed = 20.0f;
     public float m_goalDistance = 10.0f;
     public override bool DoAction(GameObject actor)
     {
@@ -45,6 +53,11 @@ public class Drop : Action
 public class PickUpSomething : Action
 {
     public GameObject m_targetObject;
+    public PickUpSomething(){}
+    public PickUpSomething(GameObject obj)
+    {
+        m_targetObject = obj;
+    }
     public override bool DoAction(GameObject actor)
     {
         m_targetObject.SendMessage("PlayerUseObject", actor);
@@ -64,6 +77,23 @@ public class CraftSomething : Action
         return true;
     }
 }
+#endregion
+
+#region AdvancedActions
+class GetSomething : Action
+{
+    public GetSomething(CraftingComponent thingToGet) { m_thingToGet = thingToGet;}
+    public CraftingComponent m_thingToGet;
+    public override bool DoAction(GameObject actor) {
+        ActionList list = actor.GetComponent<ActionList>();
+        GameObject goalObj = CraftingAIGlobals.GetClosest(m_thingToGet, actor);
+        list.m_list.Insert(1, new GoSomewhere(goalObj.transform.position));
+        list.m_list.Insert(2, new PickUpSomething(goalObj));
+        return true;
+    }
+}
+
+#endregion
 
 public class ActionList : MonoBehaviour {
 
