@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
+public enum MaterialType { Normal = 0, Tool, EnemyDrop };
 [System.Serializable]
 public class ComponentAndCount
 {
     public CraftingComponent component;
     public int count = 1;
+    public MaterialType type = MaterialType.Normal;
 }
 
 [System.Serializable]
@@ -16,7 +18,6 @@ public class CraftingRecipe
     public List<ComponentAndCount> m_craftingComponents;
     // optional recipe components
     public float m_time = 0.0f;
-    public List<CraftingComponent> m_required_tools;
 }
 
 
@@ -49,25 +50,23 @@ public class CraftingSystem : MonoBehaviour {
     {
         List<int> indexesofMaterialsToExpend = new List<int>();
 
-        for (int i = 0; i < recipe.m_required_tools.Count; ++i)
-        {
-            CraftingComponent component = recipe.m_required_tools[i];
-            if (materialSource.CountOf(component) == 0)
-                return null; // tool missing, could not craft
-        }
-
-
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
             GameObject component = recipe.m_craftingComponents[i].component.gameObject;
-            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) == 0)
+            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) < recipe.m_craftingComponents[i].count)
                 return null; // material missing, could not craft
         }
         // TODO make this less super slow
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i].component.gameObject;
-            materialSource.DeleteFromInventory(component.GetComponent<CraftingComponent>());
+            if (recipe.m_craftingComponents[i].type == MaterialType.Tool)
+                continue; // don't delete tools
+
+            for (int j = 0; j < recipe.m_craftingComponents[i].count; ++j)
+            {
+                GameObject component = recipe.m_craftingComponents[i].component.gameObject;
+                materialSource.DeleteFromInventory(component.GetComponent<CraftingComponent>());
+            }
         }
 
 

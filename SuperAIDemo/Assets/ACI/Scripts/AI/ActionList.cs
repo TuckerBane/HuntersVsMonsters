@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// TODO add enter and exit events
 public class Action
 {
     // returns true if the action is complete
@@ -25,7 +26,10 @@ public class GoSomewhere : Action
     {
         Vector3 toDestination = (m_destination - actor.transform.position);
         if (toDestination.magnitude <= m_goalDistance)
+        {
+            actor.GetComponent<Rigidbody>().velocity = Vector3.zero;
             return true;
+        }
         toDestination.Normalize();
         actor.GetComponent<Rigidbody>().velocity = toDestination * m_speed;
         return false;
@@ -73,6 +77,12 @@ public class CraftSomething : Action
     {
         GameObject newObj = m_craftingSystem.TryToCraft(actor.GetComponent<Inventory>(), m_recipe);
         // HACK don't instantly pick it up, looks bad
+        if (newObj == null)
+        {
+            Debug.Log("Crafting attempt failed");
+            return true; // stop trying
+        }
+
         newObj.SendMessage("PlayerUseObject", actor);
         return true;
     }
@@ -91,6 +101,47 @@ class GetSomething : Action
         list.m_list.Insert(2, new PickUpSomething(goalObj));
         return true;
     }
+}
+
+class KillEnemy : Action
+{
+    CraftingComponent m_itemDropPrefab;
+    private GameObject m_targetEnemy;
+    private bool start = true;
+    public KillEnemy(CraftingComponent itemDropPrefab) { m_itemDropPrefab = itemDropPrefab; }
+    public override bool DoAction(GameObject actor)
+    {
+        if (start)
+        {
+            start = false;
+            Start(actor);
+        }
+
+        if (m_targetEnemy == null) // if the enemy is dead
+        {
+            actor.GetComponent<ActionList>().m_list.Insert(1, new GetSomething(m_itemDropPrefab) );
+            return true; // we're done here
+        }
+
+        Vector3 toDestination = (m_targetEnemy.transform.position - actor.transform.position);
+        if (toDestination.magnitude > actor.GetComponent<Attack>().m_attackRange)
+        {
+            GoSomewhere go = new GoSomewhere(m_targetEnemy.transform.position);
+            go.m_goalDistance = actor.GetComponent<Attack>().m_attackRange - 1.0f;
+            actor.GetComponent<ActionList>().m_list.Insert(0, go);
+            return false; // go to the enemy, then try this again
+        }
+
+
+        return false; // wait for the  enemy to die
+    }
+    private void Start(GameObject actor)
+    {
+        m_targetEnemy = CraftingAIGlobals.GetClosestEnemy(m_itemDropPrefab, actor);
+        //TODO make enemy stuff generic, maybe using messages. That way it's more toolish.
+        actor.GetComponent<Attack>().m_target = m_targetEnemy;
+    }
+
 }
 
 #endregion
