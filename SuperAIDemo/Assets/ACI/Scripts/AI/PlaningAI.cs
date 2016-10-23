@@ -49,11 +49,25 @@ public class PlaningAI : MonoBehaviour {
         MakePlan();
 	}
 
+
+    // TODO don't get things we already have
     void MakePlan()
     {
         m_recipesForToolsForCurrentPlan.Clear();
         RecipeNode m_goalRecipe = new RecipeNode();
-        m_goalRecipe.m_recipe = m_craftingSystem.GetRecipe(m_objectivePrefab);
+        List<CraftingRecipe> recipes = m_craftingSystem.GetRecipes(m_objectivePrefab);
+        CraftingRecipe bestRecipe = recipes[0];
+        foreach(CraftingRecipe recipe in recipes) // heuristic test
+        {
+            if (recipe.m_craftingComponents.Count < bestRecipe.m_craftingComponents.Count ||
+                (
+                (recipe.m_craftingComponents.Count == bestRecipe.m_craftingComponents.Count) && recipe.m_time < bestRecipe.m_time  )
+                )
+            {
+                bestRecipe = recipe;
+            }
+        }
+        m_goalRecipe.m_recipe = m_craftingSystem.GetBestRecipe(m_objectivePrefab);
         ExtendRecipeChain(m_goalRecipe);
         m_goalRootNode = m_goalRecipe;
 
@@ -78,8 +92,8 @@ public class PlaningAI : MonoBehaviour {
     {
         //TODO check for items in inventory
         foreach(ComponentAndCount componentCount in recipe.m_recipe.m_craftingComponents)
-        { 
-            CraftingRecipe newRecipe = m_craftingSystem.GetRecipe(componentCount.component.gameObject);
+        {
+            CraftingRecipe newRecipe = m_craftingSystem.GetBestRecipe(componentCount.component.gameObject);
 
             if (newRecipe != null)
             {
@@ -129,13 +143,6 @@ public class PlaningAI : MonoBehaviour {
                     GetSomething get = new GetSomething(componentCount.component);
                     m_myActions.m_list.Add(get);
                 }
-//                 GoSomewhere go = new GoSomewhere();
-//                 go.m_destination = goalObject.transform.position;
-//                 m_myActions.m_list.Add(go);
-// 
-//                 PickUpSomething pickup = new PickUpSomething();
-//                 pickup.m_targetObject = goalObject;
-//                 m_myActions.m_list.Add(pickup);
             }
         }
 

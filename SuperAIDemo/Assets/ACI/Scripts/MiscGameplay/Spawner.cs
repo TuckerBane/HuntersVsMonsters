@@ -27,7 +27,8 @@ public class Spawner : MonoBehaviour {
             yield return new WaitForSeconds(0.2f);
             foreach (var obj in m_objectsIMade)
             {
-                if (!obj)
+                // it may be deprecated, but I need it.
+                if (!obj || ( (GameObject) obj).active == false )
                 {
                     m_objectsIMade.Remove(obj);
                     break;

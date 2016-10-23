@@ -15,7 +15,7 @@ public class ComponentAndCount
 public class CraftingRecipe
 {
     public GameObject m_createdObjectPrefab;
-    public List<ComponentAndCount> m_craftingComponents;
+    public List<ComponentAndCount> m_craftingComponents = new List<ComponentAndCount>();
     // optional recipe components
     public float m_time = 0.0f;
 }
@@ -73,18 +73,38 @@ public class CraftingSystem : MonoBehaviour {
         return Instantiate(recipe.m_createdObjectPrefab);
     }
 
-    public CraftingRecipe GetRecipe(GameObject recipeTarget)
+    public CraftingRecipe GetBestRecipe(GameObject recipeTarget)
+    {
+        List<CraftingRecipe> recipes = GetRecipes(recipeTarget);
+        if (recipes.Count == 0)
+            return null;
+        CraftingRecipe bestRecipe = recipes[0];
+        foreach(CraftingRecipe recipe in recipes) // heuristic test
+        {
+            if (recipe.m_craftingComponents.Count < bestRecipe.m_craftingComponents.Count ||
+                (
+                (recipe.m_craftingComponents.Count == bestRecipe.m_craftingComponents.Count) && recipe.m_time < bestRecipe.m_time)
+                )
+            {
+                bestRecipe = recipe;
+            }
+        }
+        return bestRecipe;
+    }
+
+    public List<CraftingRecipe> GetRecipes(GameObject recipeTarget)
     {
         CraftingComponent target = recipeTarget.GetComponent<CraftingComponent>();
+        List<CraftingRecipe> recipes = new List<CraftingRecipe>();
         foreach (CraftingRecipe rec in m_recipes)
         {
             if (target.name == rec.m_createdObjectPrefab.GetComponent<CraftingComponent>().name)
             {
-                return rec;
+                recipes.Add(rec);
             }
         }
 
-        return null;
+        return recipes;
     }
 
         // Use this for initialization
