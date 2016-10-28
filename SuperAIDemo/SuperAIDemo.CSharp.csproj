@@ -70,6 +70,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\ACI\Scripts\AI\ActionList.cs" />
+    <Compile Include="Assets\ACI\Scripts\AI\GraphDrawer.cs" />
     <Compile Include="Assets\ACI\Scripts\AI\PlaningAI.cs" />
     <Compile Include="Assets\ACI\Scripts\Crafting\CraftingAIGlobals.cs" />
     <Compile Include="Assets\ACI\Scripts\Crafting\CraftingComponent.cs" />
