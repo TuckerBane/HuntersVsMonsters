@@ -8,6 +8,15 @@ public class Inventory : MonoBehaviour
     public List<GameObject> m_objectStore;
     public float m_objectPlaceDistance;
     // Use this for initialization
+
+    public Inventory DeepCopy()
+    {
+        Inventory newInv = new Inventory();
+        //newInv.m_objectStore = m_objectStore.
+
+        return newInv;
+    }
+
     void Start()
     {}
 

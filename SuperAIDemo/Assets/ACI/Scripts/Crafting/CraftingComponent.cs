@@ -19,6 +19,8 @@ public class CraftingComponent : MonoBehaviour {
     public void Awake()
     {
         SetCraftingName();
+        if (m_iconPrefab == null)
+            m_iconPrefab = FindObjectOfType<CraftingAIGlobals>().m_defualtIconPrefab;
     }
     public void Reset()
     {
@@ -58,7 +60,12 @@ public class CraftingComponent : MonoBehaviour {
 
     #region HasIcon
     public GameObject m_iconPrefab;
-    
+    public GameObject GetIconPrefab()
+    {
+        if (m_iconPrefab == null)
+            m_iconPrefab = FindObjectOfType<CraftingAIGlobals>().m_defualtIconPrefab;
+        return m_iconPrefab;
+    }
     #endregion
 }
 

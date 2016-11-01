@@ -8,6 +8,7 @@ public class RecipeNode
     public CraftingRecipe m_recipe;
     // lack of pointers/references makes me sad
     public List<int> m_requiredRecipeIndexes = new List<int>();
+    public List<CraftingComponent> m_requiredBasicMaterials = new List<CraftingComponent>();
 }
 
 public class PlaningAI : MonoBehaviour {
@@ -32,41 +33,37 @@ public class PlaningAI : MonoBehaviour {
         }
     }
 
-
     public GameObject m_objectivePrefab;
     public RecipeNode m_goalRootNode;
+
     private CraftingSystem m_craftingSystem;
     private ActionList m_myActions;
     private CraftingAIGlobals m_globals;
     private List<RecipeNode> m_recipesForToolsForCurrentPlan = new List<RecipeNode>();
+    private GraphDrawer m_graphDrawer;
+    private Inventory m_myInventory;
+    // Easy way to track inventory usage during plan making
+    private Inventory m_imaginaryInventory;
     
-
 	// Use this for initialization
 	void Start () {
         m_craftingSystem = FindObjectOfType<CraftingSystem>();
+        m_graphDrawer = GetComponent<GraphDrawer>();
         m_myActions = GetComponent<ActionList>();
+        m_myInventory = GetComponent<Inventory>();
         
         MakePlan();
+        MakePlanGraph(m_goalRootNode);
 	}
-
 
     // TODO don't get things we already have
     void MakePlan()
     {
+        m_imaginaryInventory = m_myInventory.DeepCopy();
+
         m_recipesForToolsForCurrentPlan.Clear();
         RecipeNode m_goalRecipe = new RecipeNode();
-        List<CraftingRecipe> recipes = m_craftingSystem.GetRecipes(m_objectivePrefab);
-        CraftingRecipe bestRecipe = recipes[0];
-        foreach(CraftingRecipe recipe in recipes) // heuristic test
-        {
-            if (recipe.m_craftingComponents.Count < bestRecipe.m_craftingComponents.Count ||
-                (
-                (recipe.m_craftingComponents.Count == bestRecipe.m_craftingComponents.Count) && recipe.m_time < bestRecipe.m_time  )
-                )
-            {
-                bestRecipe = recipe;
-            }
-        }
+        CraftingRecipe bestRecipe = m_craftingSystem.GetBestRecipe(m_objectivePrefab);
         m_goalRecipe.m_recipe = m_craftingSystem.GetBestRecipe(m_objectivePrefab);
         ExtendRecipeChain(m_goalRecipe);
         m_goalRootNode = m_goalRecipe;
@@ -112,13 +109,11 @@ public class PlaningAI : MonoBehaviour {
                 craft.m_recipe = newRecipe;
                 craft.m_craftingSystem = m_craftingSystem;
                 m_myActions.m_list.Add(craft); // craft the thing
-
-                // HACK go pick it up
-
-                // make tree here
             }
             else
             {
+                // TODO do something special for enemy kill missions
+                recipe.m_requiredBasicMaterials.Add(componentCount.component);
                 if(componentCount.type == MaterialType.EnemyDrop)
                 {
                     for (int i = 0; i < componentCount.count; ++i)
@@ -152,4 +147,46 @@ public class PlaningAI : MonoBehaviour {
 	void Update () {
 	
 	}
+
+    GameObject GetNodeIcon(RecipeNode node)
+    {
+        return node.m_recipe.m_createdObjectPrefab.GetComponent<CraftingComponent>().GetIconPrefab();
+    }
+
+    void MakePlanGraph(RecipeNode goalRootNode)
+    {
+        Vector3 currentNodePosition = new Vector3(0, 10, 0);
+        GameObject startingIcon = m_graphDrawer.PutSymbolAtPos(GetNodeIcon(goalRootNode), currentNodePosition);
+        RecursiveGraphDraw(startingIcon, currentNodePosition, goalRootNode);
+    }
+
+    void RecursiveGraphDraw(GameObject prevIcon, Vector3 prevIconPosition, RecipeNode prevNode, float nodeSeperation = 10)
+    {
+        float numNodes = prevNode.m_requiredRecipeIndexes.Count + prevNode.m_requiredBasicMaterials.Count;
+        Vector3 newPosition = prevIconPosition + new Vector3( -(numNodes - 0.5f) * nodeSeperation / 2.0f, 10, 0);
+
+
+        foreach(int nodeIndex in prevNode.m_requiredRecipeIndexes)
+        {
+            // TODO factor this out
+            RecipeNode currentNode = m_recipeNodes[nodeIndex];
+            GameObject newIconPrefab = GetNodeIcon(currentNode);
+            GameObject newIcon = m_graphDrawer.PutSymbolAtPos(newIconPrefab, newPosition);
+            m_graphDrawer.DrawArrowBetweenThings(newIcon, prevIcon);
+            RecursiveGraphDraw(newIcon, newPosition, currentNode, nodeSeperation / 2);
+            newPosition += new Vector3(nodeSeperation, 0, 0);
+        }
+
+        foreach(CraftingComponent comp in prevNode.m_requiredBasicMaterials)
+        {
+            GameObject newIconPrefab = comp.GetIconPrefab();
+            GameObject newIcon = m_graphDrawer.PutSymbolAtPos(newIconPrefab, newPosition);
+            m_graphDrawer.DrawArrowBetweenThings(newIcon, prevIcon);
+            //RecursiveGraphDraw(newIcon, newPosition, currentNode, nodeSeperation / 2);
+            newPosition += new Vector3(nodeSeperation, 0, 0);
+        }
+
+    }
+
+
 }
