@@ -2,22 +2,25 @@
 using System.Collections;
 using UnityStandardAssets.Utility;
 
-public class GraphDrawer : MonoBehaviour {
+public class GraphDrawer : MonoBehaviour
+{
 
     public GameObject m_testSymbol;
     public GameObject m_arrowPrefab;
 
-	// Use this for initialization
-	void Start () {
-//         GameObject obj1 = PutSymbolAtPos(m_testSymbol, new Vector3(7, 10, 0));
-//         GameObject obj2 = PutSymbolAtPos(m_testSymbol, new Vector3(0, 30, 0));
-//         DrawArrowBetweenThings(obj1, obj2);
+    // Use this for initialization
+    void Start()
+    {
+        //         GameObject obj1 = PutSymbolAtPos(m_testSymbol, new Vector3(7, 10, 0));
+        //         GameObject obj2 = PutSymbolAtPos(m_testSymbol, new Vector3(0, 30, 0));
+        //         DrawArrowBetweenThings(obj1, obj2);
     }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
 
     void ScaleVector(ref Vector3 vec)
     {
@@ -28,7 +31,7 @@ public class GraphDrawer : MonoBehaviour {
     {
         if (symbolPrefab == null)
         {
-            int i = 0;
+            return null;
         }
 
         GameObject newSymbol = Instantiate(symbolPrefab, transform) as GameObject;
@@ -50,6 +53,6 @@ public class GraphDrawer : MonoBehaviour {
 
         Vector3 startToEnd = end.transform.position - start.transform.position;
         newArrow.transform.position += startToEnd / 2.0f;
-        
+
     }
 }

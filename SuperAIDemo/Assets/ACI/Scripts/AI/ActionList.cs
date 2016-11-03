@@ -2,11 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 
-// TODO add enter and exit events
 public class Action
 {
     // returns true if the action is complete
+    public virtual void OnEnterAction(GameObject actor) { ; }
     public virtual bool DoAction(GameObject actor) { return true; }
+
+    public virtual void OnExitAction(GameObject actor) { ; }
 }
 
 #region BasicActions
@@ -97,6 +99,12 @@ class GetSomething : Action
     public override bool DoAction(GameObject actor) {
         ActionList list = actor.GetComponent<ActionList>();
         GameObject goalObj = CraftingAIGlobals.GetClosest(m_thingToGet, actor);
+        if (goalObj == null)
+        {
+            Debug.Log("no closest " + m_thingToGet.name + " to find");
+            return true;
+        }
+
         list.m_list.Insert(1, new GoSomewhere(goalObj.transform.position));
         list.m_list.Insert(2, new PickUpSomething(goalObj));
         return true;
@@ -138,7 +146,7 @@ class KillEnemy : Action
     private void Start(GameObject actor)
     {
         m_targetEnemy = CraftingAIGlobals.GetClosestEnemy(m_itemDropPrefab, actor);
-        //TODO make enemy stuff generic, maybe using messages. That way it's more toolish.
+        //HACK make enemy stuff generic, maybe using messages. That way it's more toolish.
         actor.GetComponent<Attack>().m_target = m_targetEnemy;
     }
 
@@ -149,6 +157,7 @@ class KillEnemy : Action
 public class ActionList : MonoBehaviour {
 
     public List<Action> m_list = new List<Action>();
+    private bool m_listWasEmpty = true;
 	// Use this for initialization
 	void Start () {
         //m_list.Add(new GoSomewhere());
@@ -156,10 +165,25 @@ public class ActionList : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+
+        // if the list was empty earlier, we don't want to skip the first enter
+        if (m_listWasEmpty && m_list.Count > 0)
+        {
+            m_list[0].OnEnterAction(gameObject);
+            m_listWasEmpty = false;
+        }
+
         // does action and checks for completion. Also allows for multiple 0 time actions in a single frame
-            while (m_list.Count > 0 && m_list[0].DoAction(gameObject))
-                m_list.RemoveAt(0);
+        while (m_list.Count > 0 && m_list[0].DoAction(gameObject))
+        {
+            m_list[0].OnExitAction(gameObject);
+            m_list.RemoveAt(0);
+            if (m_list.Count > 0)
+                m_list[0].OnEnterAction(gameObject);
+        }
+
+        if (m_list.Count == 0)
+            m_listWasEmpty = true;
+
 	}
 }
-
-

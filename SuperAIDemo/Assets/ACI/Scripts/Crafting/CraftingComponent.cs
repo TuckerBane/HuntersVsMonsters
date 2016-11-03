@@ -1,8 +1,15 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CraftingComponent : MonoBehaviour {
+public class CraftingComponent : MonoBehaviour
+{
 
+  public bool Equals(CraftingComponent otherComp)
+    {
+        if (otherComp == null)
+            return false;
+        return m_craftingName == otherComp.m_craftingName;
+    }
 
     #region CraftingName
     public string m_craftingName = "Name defaulted to object name stripped of copy identifier";

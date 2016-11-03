@@ -9,10 +9,11 @@ public class Inventory : MonoBehaviour
     public float m_objectPlaceDistance;
     // Use this for initialization
 
-    public Inventory DeepCopy()
+    // HACK it would be really nice if this works, but it clearly won't :(
+    private Inventory DeepCopy()
     {
         Inventory newInv = new Inventory();
-        //newInv.m_objectStore = m_objectStore.
+        newInv.m_objectStore = m_objectStore;
 
         return newInv;
     }
@@ -50,7 +51,6 @@ public class Inventory : MonoBehaviour
                 if (m_objectStore.Count != 0)
                     placedObject = m_objectStore[m_objectStore.Count - 1];
             }
-            // TODO: put this in a function
             if (!placedObject)
                 return;
 

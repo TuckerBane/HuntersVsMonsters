@@ -12,13 +12,13 @@ public class Health : MonoBehaviour {
 
     public class DamageModifiers
     {
-        public int m_fire;
-        public int m_ice;
-        public int m_bludgeoning;
-        public int m_piercing;
+        public int m_fire = 0;
+        public int m_ice = 0;
+        public int m_bludgeoning = 0;
+        public int m_piercing = 0;
     };
 
-    public DamageModifiers m_damageModifers;
+    public DamageModifiers m_damageModifers = new DamageModifiers();
 
     public int GetDamageModifier(DamageType type)
     {
@@ -57,8 +57,7 @@ public class Health : MonoBehaviour {
         {
             Debug.Log("Invalid damage type");
         }
-        //TODO use damage modifiers
-        //message.amount += GetDamageModifier(message.type);
+        message.amount += GetDamageModifier(message.type);
         if (message.amount < 0)
             return;
         m_health -= message.amount;

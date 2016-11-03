@@ -59,7 +59,7 @@ public class PlaningAI : MonoBehaviour {
     // TODO don't get things we already have
     void MakePlan()
     {
-        m_imaginaryInventory = m_myInventory.DeepCopy();
+        //m_imaginaryInventory = m_myInventory.DeepCopy();
 
         m_recipesForToolsForCurrentPlan.Clear();
         RecipeNode m_goalRecipe = new RecipeNode();
@@ -85,12 +85,52 @@ public class PlaningAI : MonoBehaviour {
         m_myActions.m_list.Add(new Drop()); // drop what you made
     }
 	
+    CraftingRecipe GetBestRecipe(ComponentAndCount componentCount)
+    {
+        int smallestNumberOfRequirments = int.MaxValue;
+        int smallestNumberOfItemsUsed = int.MaxValue;
+        CraftingRecipe bestRecipe = null;
+
+        foreach(CraftingRecipe rec in m_craftingSystem.m_recipes)
+        {
+            // possible recipe
+            if (rec.m_createdObjectPrefab.GetComponent<CraftingComponent>().Equals(componentCount.m_component) )
+            {
+                int itemsNeeded = 0;
+                int itemsUsed = 0;
+                foreach(ComponentAndCount compCount in rec.m_craftingComponents)
+                {
+                    int countInInventory = m_myInventory.CountOf(compCount.m_component);
+                    if (compCount.m_count > countInInventory) // we still need more of this thing
+                    {
+                        itemsNeeded += compCount.m_count - countInInventory;
+                        itemsUsed += countInInventory;
+                    }
+                    else
+                    {
+                        itemsUsed += compCount.m_count;
+                    }
+                }
+
+                if (itemsNeeded < smallestNumberOfRequirments || itemsNeeded == smallestNumberOfRequirments && itemsUsed < smallestNumberOfItemsUsed) // new best recipe
+                {
+                    smallestNumberOfRequirments = itemsNeeded;
+                    smallestNumberOfItemsUsed = itemsUsed;
+                    bestRecipe = rec;
+                }
+
+            }
+        }
+
+        return bestRecipe;
+    }
+
     void ExtendRecipeChain(RecipeNode recipe)
     {
         //TODO check for items in inventory
         foreach(ComponentAndCount componentCount in recipe.m_recipe.m_craftingComponents)
         {
-            CraftingRecipe newRecipe = m_craftingSystem.GetBestRecipe(componentCount.component.gameObject);
+            CraftingRecipe newRecipe = GetBestRecipe(componentCount);
 
             if (newRecipe != null)
             {
@@ -112,30 +152,29 @@ public class PlaningAI : MonoBehaviour {
             }
             else
             {
-                // TODO do something special for enemy kill missions
-                recipe.m_requiredBasicMaterials.Add(componentCount.component);
-                if(componentCount.type == MaterialType.EnemyDrop)
+                // HACK do something special for enemy kill missions
+                recipe.m_requiredBasicMaterials.Add(componentCount.m_component);
+                if(componentCount.m_type == MaterialType.EnemyDrop)
                 {
-                    for (int i = 0; i < componentCount.count; ++i)
+                    for (int i = 0; i < componentCount.m_count; ++i)
                     {
-                        m_myActions.m_list.Add(new KillEnemy(componentCount.component));
+                        m_myActions.m_list.Add(new KillEnemy(componentCount.m_component));
                     }
-                    return;
+                    continue;
                 }
 
                 // HACK Ideally, use vision or something, but probably not.
-                string craftingName = componentCount.component.m_craftingName;
-                GameObject goalObj = CraftingAIGlobals.GetClosest(componentCount.component, gameObject);
+                string craftingName = componentCount.m_component.m_craftingName;
+                GameObject goalObj = CraftingAIGlobals.GetClosest(componentCount.m_component, gameObject);
                 if (goalObj == null)
                 {
                     Debug.Log("Crafting component not found");
                     return; // no plan for getting this because it doesn't exist :(
                 }
 
-                // TODO choose the closest object instead
-                for (int i = 0; i < componentCount.count; ++i)
+                for (int i = 0; i < componentCount.m_count; ++i)
                 {
-                    GetSomething get = new GetSomething(componentCount.component);
+                    GetSomething get = new GetSomething(componentCount.m_component);
                     m_myActions.m_list.Add(get);
                 }
             }
@@ -168,7 +207,7 @@ public class PlaningAI : MonoBehaviour {
 
         foreach(int nodeIndex in prevNode.m_requiredRecipeIndexes)
         {
-            // TODO factor this out
+            // HACK a little copy-paste like
             RecipeNode currentNode = m_recipeNodes[nodeIndex];
             GameObject newIconPrefab = GetNodeIcon(currentNode);
             GameObject newIcon = m_graphDrawer.PutSymbolAtPos(newIconPrefab, newPosition);
@@ -185,8 +224,8 @@ public class PlaningAI : MonoBehaviour {
             //RecursiveGraphDraw(newIcon, newPosition, currentNode, nodeSeperation / 2);
             newPosition += new Vector3(nodeSeperation, 0, 0);
         }
+       
 
     }
-
 
 }

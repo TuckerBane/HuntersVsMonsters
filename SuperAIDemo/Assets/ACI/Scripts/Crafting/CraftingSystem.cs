@@ -6,9 +6,9 @@ public enum MaterialType { Normal = 0, Tool, EnemyDrop };
 [System.Serializable]
 public class ComponentAndCount
 {
-    public CraftingComponent component;
-    public int count = 1;
-    public MaterialType type = MaterialType.Normal;
+    public CraftingComponent m_component;
+    public int m_count = 1;
+    public MaterialType m_type = MaterialType.Normal;
 }
 
 [System.Serializable]
@@ -52,19 +52,19 @@ public class CraftingSystem : MonoBehaviour {
 
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            GameObject component = recipe.m_craftingComponents[i].component.gameObject;
-            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) < recipe.m_craftingComponents[i].count)
+            GameObject component = recipe.m_craftingComponents[i].m_component.gameObject;
+            if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) < recipe.m_craftingComponents[i].m_count)
                 return null; // material missing, could not craft
         }
-        // TODO make this less super slow
+        // HACK make this less super slow
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
-            if (recipe.m_craftingComponents[i].type == MaterialType.Tool)
+            if (recipe.m_craftingComponents[i].m_type == MaterialType.Tool)
                 continue; // don't delete tools
 
-            for (int j = 0; j < recipe.m_craftingComponents[i].count; ++j)
+            for (int j = 0; j < recipe.m_craftingComponents[i].m_count; ++j)
             {
-                GameObject component = recipe.m_craftingComponents[i].component.gameObject;
+                GameObject component = recipe.m_craftingComponents[i].m_component.gameObject;
                 materialSource.DeleteFromInventory(component.GetComponent<CraftingComponent>());
             }
         }
