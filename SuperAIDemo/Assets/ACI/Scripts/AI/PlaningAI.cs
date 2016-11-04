@@ -56,9 +56,11 @@ public class PlaningAI : MonoBehaviour {
         MakePlanGraph(m_goalRootNode);
 	}
 
+
     // TODO don't get things we already have
     void MakePlan()
     {
+
         //m_imaginaryInventory = m_myInventory.DeepCopy();
 
         m_recipesForToolsForCurrentPlan.Clear();

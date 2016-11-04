@@ -92,6 +92,7 @@
     <Compile Include="Assets\ACI\Scripts\MiscGameplay\Pickupable.cs" />
     <Compile Include="Assets\ACI\Scripts\MiscGameplay\PlayerUseObject.cs" />
     <Compile Include="Assets\ACI\Scripts\MiscGameplay\Spawner.cs" />
+    <Compile Include="Assets\ACI\Scripts\UI\RecipeMaker.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\FreeCharacter\TestingComputeShader.compute" />

@@ -107,10 +107,17 @@ public class CraftingSystem : MonoBehaviour {
         return recipes;
     }
 
+    public void AddRecipe(CraftingRecipe recipe)
+    {
+        CraftingRecipe[] temp = m_recipes;
+        m_recipes = new CraftingRecipe[temp.Length + 1];
+        temp.CopyTo(m_recipes, 0);
+        m_recipes[m_recipes.Length - 1] = recipe;
+    }
+
         // Use this for initialization
-        void Start () {
-	
-	}
+   void Start () {
+    }
 	
 	// Update is called once per frame
 	void Update () {
