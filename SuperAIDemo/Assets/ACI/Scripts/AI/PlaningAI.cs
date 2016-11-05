@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 [System.Serializable]
 public class RecipeNode
 {
@@ -9,6 +10,12 @@ public class RecipeNode
     // lack of pointers/references makes me sad
     public List<int> m_requiredRecipeIndexes = new List<int>();
     public List<CraftingComponent> m_requiredBasicMaterials = new List<CraftingComponent>();
+}
+
+public class InvetoryItem
+{
+    public string m_craftingName;
+    public int m_count;
 }
 
 public class PlaningAI : MonoBehaviour {
@@ -61,12 +68,12 @@ public class PlaningAI : MonoBehaviour {
     void MakePlan()
     {
 
-        //m_imaginaryInventory = m_myInventory.DeepCopy();
+        m_imaginaryInventory = m_myInventory.DeepCopy();
 
         m_recipesForToolsForCurrentPlan.Clear();
         RecipeNode m_goalRecipe = new RecipeNode();
-        CraftingRecipe bestRecipe = m_craftingSystem.GetBestRecipe(m_objectivePrefab);
-        m_goalRecipe.m_recipe = m_craftingSystem.GetBestRecipe(m_objectivePrefab);
+        CraftingRecipe bestRecipe = GetBestRecipe(m_objectivePrefab.GetComponent<CraftingComponent>());
+        m_goalRecipe.m_recipe = GetBestRecipe(m_objectivePrefab.GetComponent<CraftingComponent>());
         ExtendRecipeChain(m_goalRecipe);
         m_goalRootNode = m_goalRecipe;
 
@@ -87,7 +94,7 @@ public class PlaningAI : MonoBehaviour {
         m_myActions.m_list.Add(new Drop()); // drop what you made
     }
 	
-    CraftingRecipe GetBestRecipe(ComponentAndCount componentCount)
+    CraftingRecipe GetBestRecipe(CraftingComponent component)
     {
         int smallestNumberOfRequirments = int.MaxValue;
         int smallestNumberOfItemsUsed = int.MaxValue;
@@ -96,13 +103,13 @@ public class PlaningAI : MonoBehaviour {
         foreach(CraftingRecipe rec in m_craftingSystem.m_recipes)
         {
             // possible recipe
-            if (rec.m_createdObjectPrefab.GetComponent<CraftingComponent>().Equals(componentCount.m_component) )
+            if (rec.m_createdObjectPrefab.GetComponent<CraftingComponent>().Equals(component) )
             {
                 int itemsNeeded = 0;
                 int itemsUsed = 0;
                 foreach(ComponentAndCount compCount in rec.m_craftingComponents)
                 {
-                    int countInInventory = m_myInventory.CountOf(compCount.m_component);
+                    int countInInventory = m_imaginaryInventory.CountOf(compCount.m_component);
                     if (compCount.m_count > countInInventory) // we still need more of this thing
                     {
                         itemsNeeded += compCount.m_count - countInInventory;
@@ -127,38 +134,58 @@ public class PlaningAI : MonoBehaviour {
         return bestRecipe;
     }
 
+    void ComsumeResources(ComponentAndCount componentCount)
+    {
+        if (componentCount.m_type == MaterialType.Tool) // don't consume tools
+            return;
+        int countInInventory = m_imaginaryInventory.CountOf(componentCount.m_component);
+        int numberToConsume = System.Math.Min(countInInventory, componentCount.m_count);
+        for (int i = 0; i < numberToConsume; ++i)
+        {
+            m_imaginaryInventory.DeleteFromInventory(componentCount.m_component);
+        }
+
+    }
     void ExtendRecipeChain(RecipeNode recipe)
     {
         //TODO check for items in inventory
         foreach(ComponentAndCount componentCount in recipe.m_recipe.m_craftingComponents)
         {
-            CraftingRecipe newRecipe = GetBestRecipe(componentCount);
+            int howManyMoreNeeded = componentCount.m_count - m_imaginaryInventory.CountOf(componentCount.m_component);
+            howManyMoreNeeded = System.Math.Max(0, howManyMoreNeeded);
+            CraftingRecipe newRecipe = GetBestRecipe(componentCount.m_component);
 
-            if (newRecipe != null)
+            if (newRecipe != null) // if there's a recipe
             {
-                int recipeIndex = 0;
-                RecipeNode newNode = GetNewRecipeNode(ref recipeIndex);
-                newNode.m_recipe = newRecipe;
-                recipe.m_requiredRecipeIndexes.Add(recipeIndex);
+                    int countInInventory = m_imaginaryInventory.CountOf(componentCount.m_component);
+                    // get more if we need them
+                    for (int i = 0; i < howManyMoreNeeded; ++i)
+                    {
+                        int recipeIndex = 0;
+                        RecipeNode newNode = GetNewRecipeNode(ref recipeIndex);
+                        newNode.m_recipe = newRecipe;
+                        recipe.m_requiredRecipeIndexes.Add(recipeIndex);
 
-                ExtendRecipeChain( newNode );
-                // add use recipe to action list
-                GoSomewhere go = new GoSomewhere();
-                go.m_destination = m_craftingSystem.gameObject.transform.position;
-                m_myActions.m_list.Add(go); // go to crafting table
+                        ExtendRecipeChain(newNode);
+                        // add use recipe to action list
+                        GoSomewhere go = new GoSomewhere();
+                        go.m_destination = m_craftingSystem.gameObject.transform.position;
+                        m_myActions.m_list.Add(go); // go to crafting table
 
-                CraftSomething craft = new CraftSomething();
-                craft.m_recipe = newRecipe;
-                craft.m_craftingSystem = m_craftingSystem;
-                m_myActions.m_list.Add(craft); // craft the thing
+                        CraftSomething craft = new CraftSomething();
+                        craft.m_recipe = newRecipe;
+                        craft.m_craftingSystem = m_craftingSystem;
+                        m_myActions.m_list.Add(craft); // craft the thing 
+                    }
+                    ComsumeResources(componentCount);
             }
-            else
+            else // if there isn't a recipe
             {
                 // HACK do something special for enemy kill missions
                 recipe.m_requiredBasicMaterials.Add(componentCount.m_component);
                 if(componentCount.m_type == MaterialType.EnemyDrop)
                 {
-                    for (int i = 0; i < componentCount.m_count; ++i)
+                    for (int i = 0; i < howManyMoreNeeded; ++i)
                     {
                         m_myActions.m_list.Add(new KillEnemy(componentCount.m_component));
                     }
@@ -174,11 +201,13 @@ public class PlaningAI : MonoBehaviour {
                     return; // no plan for getting this because it doesn't exist :(
                 }
 
-                for (int i = 0; i < componentCount.m_count; ++i)
+                for (int i = 0; i < howManyMoreNeeded; ++i)
                 {
                     GetSomething get = new GetSomething(componentCount.m_component);
                     m_myActions.m_list.Add(get);
                 }
+                //HACK duplicated from the above case
+                ComsumeResources(componentCount);
             }
         }
 

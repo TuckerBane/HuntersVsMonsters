@@ -8,22 +8,14 @@ using System.Collections.Generic;
 
 public class RecipeMaker : EditorWindow
 {
-    [MenuItem("CRAFTING/RecipeMaker")]
+    [MenuItem("CRAFTING/Recipe Maker")]
     static void Init()
     {
         RecipeMaker window = (RecipeMaker)EditorWindow.GetWindow(typeof(RecipeMaker));
         window.Show();
         window.position = new Rect(20, 80, 400, 300);
     }
-
-
-    string[] modes = new string[] { "Select item to be created", "Select materials it is made of" };
-
-    List<string> listResult;
-    int editorMode, editorModeOld;
-    MonoScript targetComponent, lastChecked;
-
-    string componentName = "";
+    // allows scrolling
     Vector2 scroll;
 
     GameObject objectToBeCreated;
@@ -37,6 +29,7 @@ public class RecipeMaker : EditorWindow
     CraftingRecipe recipeInProgress = new CraftingRecipe();
     int numberOfMaterialNeeded = 1;
     MaterialType matType;
+    GameObject craftingTablePrefab;
 
 
     // shouldn't need to be here
@@ -44,177 +37,100 @@ public class RecipeMaker : EditorWindow
     List<GameObject> prefabsWithCraftingComponentsList = new List<GameObject>();
     string[] allPrefabs;
 
-    public static string[] GetAllPrefabs()
+    void CraftingSelectionButton(CraftingComponent comp)
     {
-        string[] temp = AssetDatabase.GetAllAssetPaths();
-        List<string> result = new List<string>();
-        foreach (string s in temp)
+        if (GUILayout.Button(comp.m_craftingName))
         {
-            if (s.Contains(".prefab")) result.Add(s);
+            Selection.activeGameObject = comp.gameObject;
         }
-        return result.ToArray();
-    }
-
-    public static string RemovePathAndExtention(string s)
-    {
-        int startIndex = s.LastIndexOf('/');
-        int endIndex = s.IndexOf('.');
-        return s.Substring(startIndex + 1, endIndex - startIndex - 1);
     }
 
     void OnGUI()
     {
-        GUILayout.Space(3);
-        int oldValue = GUI.skin.window.padding.bottom;
-        GUI.skin.window.padding.bottom = -20;
-           Rect windowRect = GUILayoutUtility.GetRect(1, 17);
-        windowRect.x += 4;
-        windowRect.width -= 7;
-           editorMode = GUI.SelectionGrid(windowRect, editorMode, modes, 2, "Window");
-        GUI.skin.window.padding.bottom = oldValue;
 
-        if (editorModeOld != editorMode)
+        // Get all objects with crafting components
+        prefabsWithCraftingComponentsPathsList = new List<string>();
+        prefabsWithCraftingComponentsList = new List<GameObject>();
+        allPrefabs = UIHelpers.GetAllPrefabs();
+
+        foreach (string prefab in allPrefabs)
         {
-            editorModeOld = editorMode;
-            listResult = new List<string>();
-            componentName = targetComponent == null ? "" : targetComponent.name;
-            lastChecked = null;
+            GameObject obj = (GameObject)AssetDatabase.LoadMainAssetAtPath(prefab);
+            if (obj.GetComponent<CraftingComponent>())
+            {
+                prefabsWithCraftingComponentsPathsList.Add(UIHelpers.RemovePathAndExtention(prefab));
+                prefabsWithCraftingComponentsList.Add(obj);
+            }
+            else if (obj.GetComponent<CraftingSystem>())
+            {
+                craftingTablePrefab = obj;
+            }
+       
+        }
+        prefabsWithCraftingComponentsPaths = prefabsWithCraftingComponentsPathsList.ToArray();
+        prefabsWithCraftingComponents = prefabsWithCraftingComponentsList.ToArray();
+
+        selectedCraftingPrefabIndex = EditorGUILayout.Popup("Selected crafting item", selectedCraftingPrefabIndex, prefabsWithCraftingComponentsPaths);
+        numberOfMaterialNeeded = EditorGUILayout.IntField("number needed", numberOfMaterialNeeded);
+        if (numberOfMaterialNeeded <= 0)
+            numberOfMaterialNeeded = 1;
+
+        matType = (MaterialType)EditorGUILayout.EnumPopup("Material Type", matType);
+        GUILayout.BeginHorizontal();
+        if (GUILayout.Button("Add to recipe requirements", GUILayout.Width(position.width / 2 - 10)))
+        {
+            ComponentAndCount newRequirement = new ComponentAndCount();
+            newRequirement.m_component = prefabsWithCraftingComponents[selectedCraftingPrefabIndex].GetComponent<CraftingComponent>();
+            newRequirement.m_count = numberOfMaterialNeeded;
+            newRequirement.m_type = matType;
+            recipeInProgress.m_craftingComponents.Add(newRequirement);
+        }
+        if (GUILayout.Button("Set recipe target", GUILayout.Width(position.width / 2 - 10)))
+        {
+            recipeInProgress.m_createdObjectPrefab = prefabsWithCraftingComponents[selectedCraftingPrefabIndex];
+        }
+        GUILayout.EndHorizontal();
+
+        if (GUILayout.Button("Export recipe", GUILayout.Width(position.width / 2 - 10)))
+        {
+            if (recipeInProgress.IsValid())
+            {
+                craftingTablePrefab.GetComponent<CraftingSystem>().AddRecipe(recipeInProgress);
+                FindObjectOfType<CraftingSystem>().AddRecipe(recipeInProgress);
+                recipeInProgress = new CraftingRecipe();
+            }
+            else
+                Debug.Log("recipes must have a target object and at lest one required material");
         }
 
-        switch (editorMode)
+        GUILayout.Label("Recipe object created");
+        if (recipeInProgress.m_createdObjectPrefab)
         {
-            case 0: // Select item to be created
-
-                // Get all objects with crafting components
-                prefabsWithCraftingComponentsPathsList = new List<string>();
-                prefabsWithCraftingComponentsList = new List<GameObject>();
-                allPrefabs = GetAllPrefabs();
-               
-                foreach (string prefab in allPrefabs)
-                {
-                    GameObject obj = (GameObject) AssetDatabase.LoadMainAssetAtPath(prefab);
-                    if (obj.GetComponent<CraftingComponent>())
-                    {
-                        prefabsWithCraftingComponentsPathsList.Add( RemovePathAndExtention(prefab) );
-                        prefabsWithCraftingComponentsList.Add(obj);
-                    }
-                }
-                prefabsWithCraftingComponentsPaths = prefabsWithCraftingComponentsPathsList.ToArray();
-                prefabsWithCraftingComponents = prefabsWithCraftingComponentsList.ToArray();
-
-                selectedCraftingPrefabIndex = EditorGUILayout.Popup("Selected crafting item", selectedCraftingPrefabIndex, prefabsWithCraftingComponentsPaths);
-                numberOfMaterialNeeded = EditorGUILayout.IntField("number needed" , numberOfMaterialNeeded);
-                if (numberOfMaterialNeeded <= 0)
-                    numberOfMaterialNeeded = 1;
-
-                matType = (MaterialType) EditorGUILayout.EnumPopup("Material Type", matType);
-                if (GUILayout.Button("Add selected item to recipe requirements", GUILayout.Width(position.width / 2 - 10)))
-                {
-                    ComponentAndCount newRequirement = new ComponentAndCount();
-                    //TODO add in time and type. Shouldn't be hard.
-                    newRequirement.m_component = prefabsWithCraftingComponents[selectedCraftingPrefabIndex].GetComponent<CraftingComponent>();
-                    recipeInProgress.m_craftingComponents.Add(newRequirement);
-                }
-                if (GUILayout.Button("Make selected item recipe target", GUILayout.Width(position.width / 2 - 10)))
-                {
-                    recipeInProgress.m_createdObjectPrefab = prefabsWithCraftingComponents[selectedCraftingPrefabIndex];
-                }
-
-                if (GUILayout.Button("Export recipe", GUILayout.Width(position.width / 2 - 10)))
-                {
-                    FindObjectOfType<CraftingSystem>().AddRecipe(recipeInProgress);
-                    recipeInProgress = new CraftingRecipe();
-                }
-
-
-                scroll = GUILayout.BeginScrollView(scroll);
-                foreach (string s in prefabsWithCraftingComponentsPathsList)
-                {
-                    GUILayout.BeginHorizontal();
-                    GUILayout.Label(s, GUILayout.Width(position.width / 2));
-                    if (GUILayout.Button("Add to recipe", GUILayout.Width(position.width / 2 - 10)))
-                    {
-                        Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(s);
-                    }
-                    GUILayout.EndHorizontal();
-                }
-                GUILayout.EndScrollView();
-
-//                 if (targetComponent != lastChecked)
-//                 {
-//                     lastChecked = targetComponent;
-//                     componentName = targetComponent.name;
-//                     AssetDatabase.SaveAssets();
-//                     string targetPath = AssetDatabase.GetAssetPath(targetComponent);
-//                     listResult = new List<string>();
-//                     foreach (string prefab in allPrefabs)
-//                     {
-//                         string[] single = new string[] { prefab };
-//                         string[] dependencies = AssetDatabase.GetDependencies(single);
-//                         foreach (string dependedAsset in dependencies)
-//                         {
-//                             if (dependedAsset == targetPath)
-//                             {
-//                                 listResult.Add(prefab);
-//                             }
-//                         }
-//                     }
-//                 }
-                break;
-            case 1:
-//                 if (GUILayout.Button("Search!"))
-//                 {
-//                     string[] allPrefabs = GetAllPrefabs();
-//                     listResult = new List<string>();
-//                     foreach (string prefab in allPrefabs)
-//                     {
-//                         UnityEngine.Object o = AssetDatabase.LoadMainAssetAtPath(prefab);
-//                         GameObject go;
-//                         try
-//                         {
-//                             go = (GameObject)o;
-//                             Component[] components = go.GetComponentsInChildren<Component>(true);
-//                             foreach (Component c in components)
-//                             {
-//                                 if (c == null)
-//                                 {
-//                                     listResult.Add(prefab);
-//                                 }
-//                             }
-//                         }
-//                         catch
-//                         {
-//                             Debug.Log("For some reason, prefab " + prefab + " won't cast to GameObject");
-// 
-//                         }
-//                     }
-//                 }
-                break;
+            if (GUILayout.Button(recipeInProgress.m_createdObjectPrefab.GetComponent<CraftingComponent>().m_craftingName))
+            {
+                Selection.activeGameObject = recipeInProgress.m_createdObjectPrefab;
+            }
         }
 
-//         if (listResult != null)
-//         {
-//             if (listResult.Count == 0)
-//             {
-//                 GUILayout.Label(editorMode == 0 ? (componentName == "" ? "Choose a component" : "No prefabs use component " + componentName) : ("No prefabs have missing components!\nClick Search to check again"));
-//             }
-//             else
-//             {
-//                 GUILayout.Label(editorMode == 0 ? ("The following prefabs use component " + componentName + ":") : ("The following prefabs have missing components:"));
-//                 scroll = GUILayout.BeginScrollView(scroll);
-//                 foreach (string s in listResult)
-//                 {
-//                     GUILayout.BeginHorizontal();
-//                     GUILayout.Label(s, GUILayout.Width(position.width / 2));
-//                     if (GUILayout.Button("Select", GUILayout.Width(position.width / 2 - 10)))
-//                     {
-//                         Selection.activeObject = AssetDatabase.LoadMainAssetAtPath(s);
-//                     }
-//                     GUILayout.EndHorizontal();
-//                 }
-//                 GUILayout.EndScrollView();
-//             }
-//         }
+        scroll = GUILayout.BeginScrollView(scroll);
+        List<ComponentAndCount> toRemove = new List<ComponentAndCount>();
+        GUILayout.Label("Recipe required materials");
+        foreach (ComponentAndCount compCount in recipeInProgress.m_craftingComponents)
+        {
+            GUILayout.BeginHorizontal();
+            CraftingSelectionButton(compCount.m_component);
+            if (GUILayout.Button("Remove from recipe", GUILayout.Width(position.width / 2 - 10)))
+            {
+                toRemove.Add(compCount);
+            }
+            GUILayout.EndHorizontal();
+        }
+        GUILayout.EndScrollView();
+
+        foreach (ComponentAndCount compCount in toRemove)
+        {
+            recipeInProgress.m_craftingComponents.Remove(compCount);
+        }
     }
 
 

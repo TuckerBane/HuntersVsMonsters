@@ -18,6 +18,16 @@ public class CraftingRecipe
     public List<ComponentAndCount> m_craftingComponents = new List<ComponentAndCount>();
     // optional recipe components
     public float m_time = 0.0f;
+    public bool IsValid()
+    {
+        return m_createdObjectPrefab != null && m_craftingComponents.Count != 0;
+    }
+    public string GetName()
+    {
+        if (!IsValid())
+            return "An invalid recipe";
+        return m_createdObjectPrefab.GetComponent<CraftingComponent>().m_craftingName;
+    }
 }
 
 
@@ -115,6 +125,37 @@ public class CraftingSystem : MonoBehaviour {
         m_recipes[m_recipes.Length - 1] = recipe;
     }
 
+    public void RemoveRecipe(CraftingRecipe recipe)
+    {
+        int indexToRemove = 0;
+        for(int i = 0; i < m_recipes.Length; ++i)
+        {
+            if (recipe == m_recipes[i])
+                indexToRemove = i;
+        }
+
+        CraftingRecipe[] temp = m_recipes;
+        m_recipes = new CraftingRecipe[temp.Length - 1];
+        if (m_recipes.Length == 0)
+            return;
+        int recipesIndex = 0;
+        for (int tempIndex = 0; tempIndex < temp.Length; ++tempIndex)
+        {
+            if (recipesIndex == m_recipes.Length)
+            {
+                m_recipes = temp;
+                Debug.Log("Recipe to remove not found");
+                break;
+            }
+
+            if (tempIndex != indexToRemove)
+            {
+                m_recipes[recipesIndex] = temp[tempIndex];
+                ++recipesIndex;
+            }
+
+        }
+    }
         // Use this for initialization
    void Start () {
     }

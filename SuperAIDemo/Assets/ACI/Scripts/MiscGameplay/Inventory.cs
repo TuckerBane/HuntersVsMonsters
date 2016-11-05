@@ -7,15 +7,18 @@ public class Inventory : MonoBehaviour
 
     public List<GameObject> m_objectStore;
     public float m_objectPlaceDistance;
-    // Use this for initialization
 
-    // HACK it would be really nice if this works, but it clearly won't :(
-    private Inventory DeepCopy()
+    public Inventory DeepCopy()
     {
-        Inventory newInv = new Inventory();
-        newInv.m_objectStore = m_objectStore;
-
-        return newInv;
+       
+        Inventory newInventory = new Inventory();
+        newInventory.m_objectStore = new List<GameObject>();
+        foreach (GameObject obj in m_objectStore)
+        {
+            newInventory.m_objectStore.Add( Instantiate<GameObject>(obj) );
+        }
+        newInventory.m_objectPlaceDistance = m_objectPlaceDistance;
+        return newInventory;
     }
 
     void Start()
@@ -85,7 +88,7 @@ public class Inventory : MonoBehaviour
             CraftingComponent compycomp = invObj.GetComponent<CraftingComponent>();
             if (compycomp == null)
                 continue;
-            if (compycomp.m_craftingName == comp.m_craftingName)
+            if ( compycomp.Equals(comp) )
             {
                 GameObject toDelete = invObj;
                 m_objectStore.Remove(invObj);
