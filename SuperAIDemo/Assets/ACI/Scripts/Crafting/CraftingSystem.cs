@@ -51,21 +51,31 @@ public class CraftingSystem : MonoBehaviour {
         }
         playersInventory.PlaceObject(craftingResult);
     }
-    GameObject TryToCraft(Inventory materialSource, int recipeIndex)
+    public GameObject TryToCraft(Inventory materialSource, int recipeIndex, string missing = null)
     {
-        return TryToCraft(materialSource, m_recipes[recipeIndex]);
+        return TryToCraft(materialSource, m_recipes[recipeIndex], missing);
     }
 
-    public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe)
+    public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe, string missingComponentErrorMessage = null)
     {
         List<int> indexesofMaterialsToExpend = new List<int>();
-
+        bool lateExit = false;
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {
             GameObject component = recipe.m_craftingComponents[i].m_component.gameObject;
             if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) < recipe.m_craftingComponents[i].m_count)
-                return null; // material missing, could not craft
+            {
+                if (missingComponentErrorMessage == null)
+                    return null; // material missing, could not craft
+                lateExit = true;
+                int amountNeeded = recipe.m_craftingComponents[i].m_count - materialSource.CountOf(component.GetComponent<CraftingComponent>());
+                missingComponentErrorMessage += recipe.m_craftingComponents[i].m_component.m_craftingName + "[" + amountNeeded + "], ";
+            }   
         }
+
+        if (lateExit)
+            return null;
+
         // HACK make this less super slow
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
         {

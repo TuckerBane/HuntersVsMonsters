@@ -16,6 +16,23 @@ public class UIHelpers : MonoBehaviour {
         return result.ToArray();
     }
 
+    public static GameObject[] GetAllPrefabsWithComponent<ComponentType>()
+    {
+        string[] paths = GetAllPrefabs();
+        List<GameObject> results = new List<GameObject>();
+        foreach(string path in paths)
+        {
+            GameObject obj = (GameObject)AssetDatabase.LoadMainAssetAtPath(path);
+            if (obj.GetComponent<ComponentType>() != null)
+            {
+                results.Add(obj);
+            }
+        }
+
+        return results.ToArray();
+    }
+
+
     public static string RemovePathAndExtention(string s)
     {
         int startIndex = s.LastIndexOf('/');
