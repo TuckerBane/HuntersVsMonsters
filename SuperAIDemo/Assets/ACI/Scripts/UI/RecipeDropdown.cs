@@ -15,15 +15,9 @@ public class RecipeDropdown : MonoBehaviour {
         foreach(CraftingRecipe recipe in myCraftingSystem.m_recipes)
         {
             string recipeNameAndInfo = recipe.GetName();
-//             recipeNameAndInfo += " (";
-//             foreach(ComponentAndCount compCount in recipe.m_craftingComponents)
-//             {
-//                 recipeNameAndInfo += compCount.m_component.m_craftingName + "[" + compCount.m_count + "], ";
-//             }
-//             recipeNameAndInfo += " )";
-            
             recipeNames.Add(recipeNameAndInfo);
         }
+        //TODO add the option to remove repeat recipes
         myDropdown.AddOptions(recipeNames);
         
     }

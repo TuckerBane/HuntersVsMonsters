@@ -40,8 +40,18 @@ public class PlaningAI : MonoBehaviour {
         }
     }
 
-    public GameObject m_objectivePrefab;
+    private GameObject m_objectivePrefab;
+    public GameObject M_objectivePrefab
+    {
+        get { return m_objectivePrefab; }
+        set { m_objectivePrefab = value;
+            MakePlan();
+            MakePlanGraph(m_goalRootNode);
+        }
+    }
+
     public RecipeNode m_goalRootNode;
+    public GameObject m_defualtGoal;
 
     private CraftingSystem m_craftingSystem;
     private ActionList m_myActions;
@@ -60,20 +70,34 @@ public class PlaningAI : MonoBehaviour {
         m_myInventory = GetComponent<Inventory>();
         
         MakePlan();
-        MakePlanGraph(m_goalRootNode);
 	}
 
+    
 
-    // TODO don't get things we already have
+    // TODO don't get things we already have (this should be working now, but I'm not 100% sure)
     void MakePlan()
     {
-
+        m_myActions.m_list.Clear();
         m_imaginaryInventory = m_myInventory.DeepCopy();
 
         m_recipesForToolsForCurrentPlan.Clear();
+        m_recipeNodes.Clear();
         RecipeNode m_goalRecipe = new RecipeNode();
-        CraftingRecipe bestRecipe = GetBestRecipe(m_objectivePrefab.GetComponent<CraftingComponent>());
+
+        if(m_objectivePrefab == null)
+        {
+            if (m_defualtGoal == null)
+                return;
+             m_objectivePrefab = m_defualtGoal;
+        }
+
         m_goalRecipe.m_recipe = GetBestRecipe(m_objectivePrefab.GetComponent<CraftingComponent>());
+        if (m_goalRecipe.m_recipe == null)
+        {
+            Debug.Log("AI plan in completable\n" + "No recipe found for " + m_objectivePrefab.GetComponent<CraftingComponent>().m_craftingName);
+            return;
+        }
+
         ExtendRecipeChain(m_goalRecipe);
         m_goalRootNode = m_goalRecipe;
 
@@ -92,6 +116,8 @@ public class PlaningAI : MonoBehaviour {
 
         // Drop
         m_myActions.m_list.Add(new Drop()); // drop what you made
+
+        MakePlanGraph(m_goalRootNode);
     }
 	
     CraftingRecipe GetBestRecipe(CraftingComponent component)
@@ -148,7 +174,6 @@ public class PlaningAI : MonoBehaviour {
     }
     void ExtendRecipeChain(RecipeNode recipe)
     {
-        //TODO check for items in inventory
         foreach(ComponentAndCount componentCount in recipe.m_recipe.m_craftingComponents)
         {
             int howManyMoreNeeded = componentCount.m_count - m_imaginaryInventory.CountOf(componentCount.m_component);
@@ -225,6 +250,12 @@ public class PlaningAI : MonoBehaviour {
 
     void MakePlanGraph(RecipeNode goalRootNode)
     {
+        foreach(SpriteRenderer child in GetComponentsInChildren<SpriteRenderer>())
+        {
+            if (child.gameObject != gameObject)
+                Destroy(child.gameObject);
+        }
+
         Vector3 currentNodePosition = new Vector3(0, 10, 0);
         GameObject startingIcon = m_graphDrawer.PutSymbolAtPos(GetNodeIcon(goalRootNode), currentNodePosition);
         RecursiveGraphDraw(startingIcon, currentNodePosition, goalRootNode);

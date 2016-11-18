@@ -157,6 +157,7 @@ class KillEnemy : Action
 public class ActionList : MonoBehaviour {
 
     public List<Action> m_list = new List<Action>();
+    public GameObject m_listFinishedEffect;
     private bool m_listWasEmpty = true;
 	// Use this for initialization
 	void Start () {
@@ -182,8 +183,16 @@ public class ActionList : MonoBehaviour {
                 m_list[0].OnEnterAction(gameObject);
         }
 
-        if (m_list.Count == 0)
+        if (m_list.Count == 0 && !m_listWasEmpty) // if we finished our action chain
+        {
             m_listWasEmpty = true;
-
+            MakeEffectsDisplay();
+        }
 	}
+
+    void MakeEffectsDisplay()
+    {
+        GameObject effectIJustMade = (GameObject) Instantiate(m_listFinishedEffect,transform,false);
+        effectIJustMade.transform.localPosition = Vector3.up * 1;
+    }
 }

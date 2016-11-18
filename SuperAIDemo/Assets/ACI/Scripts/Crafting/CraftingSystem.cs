@@ -36,7 +36,7 @@ public class CraftingSystem : MonoBehaviour {
     public GameObject[] m_baseMaterials;
     public CraftingRecipe[] m_recipes;
     public int m_recipeToMake;
-
+    public string m_missingComponentErrorMessage;
     void PlayerUseObject(GameObject player)
     {
         
@@ -51,13 +51,17 @@ public class CraftingSystem : MonoBehaviour {
         }
         playersInventory.PlaceObject(craftingResult);
     }
-    public GameObject TryToCraft(Inventory materialSource, int recipeIndex, string missing = null)
+    public GameObject TryToCraft(Inventory materialSource, int recipeIndex, bool missingComponentErrorMessage = false)
     {
-        return TryToCraft(materialSource, m_recipes[recipeIndex], missing);
+        return TryToCraft(materialSource, m_recipes[recipeIndex], missingComponentErrorMessage);
     }
 
-    public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe, string missingComponentErrorMessage = null)
+    public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe,
+        bool missingComponentErrorMessage = false)
     {
+        if (missingComponentErrorMessage)
+            m_missingComponentErrorMessage = "";
+
         List<int> indexesofMaterialsToExpend = new List<int>();
         bool lateExit = false;
         for (int i = 0; i < recipe.m_craftingComponents.Count; ++i)
@@ -65,11 +69,11 @@ public class CraftingSystem : MonoBehaviour {
             GameObject component = recipe.m_craftingComponents[i].m_component.gameObject;
             if (materialSource.CountOf(component.GetComponent<CraftingComponent>()) < recipe.m_craftingComponents[i].m_count)
             {
-                if (missingComponentErrorMessage == null)
+                if (!missingComponentErrorMessage)
                     return null; // material missing, could not craft
                 lateExit = true;
                 int amountNeeded = recipe.m_craftingComponents[i].m_count - materialSource.CountOf(component.GetComponent<CraftingComponent>());
-                missingComponentErrorMessage += recipe.m_craftingComponents[i].m_component.m_craftingName + "[" + amountNeeded + "], ";
+                m_missingComponentErrorMessage += recipe.m_craftingComponents[i].m_component.m_craftingName + "[" + amountNeeded + "]\n";
             }   
         }
 
