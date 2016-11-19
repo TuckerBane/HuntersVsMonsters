@@ -96,7 +96,6 @@ public class RecipeMaker : EditorWindow
             if (recipeInProgress.IsValid())
             {
                 craftingTablePrefab.GetComponent<CraftingSystem>().AddRecipe(recipeInProgress);
-                FindObjectOfType<CraftingSystem>().AddRecipe(recipeInProgress);
                 recipeInProgress = new CraftingRecipe();
             }
             else

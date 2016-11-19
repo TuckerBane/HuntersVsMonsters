@@ -9,7 +9,7 @@ public class CraftingUIManager : MonoBehaviour {
     public Inventory m_playersInventory;
     public Text m_errorReadout;
 
-    private CraftingSystem m_craftingSystem;
+    private CraftingSystemTerminal m_craftingSystem;
     public void TryToCraft()
     {
         int recipeIndex = m_recipeSelector.value;
@@ -34,7 +34,7 @@ public class CraftingUIManager : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-        m_craftingSystem = FindObjectOfType<CraftingSystem>();
+        m_craftingSystem = FindObjectOfType<CraftingSystemTerminal>();
 	}
 	
 	// Update is called once per frame

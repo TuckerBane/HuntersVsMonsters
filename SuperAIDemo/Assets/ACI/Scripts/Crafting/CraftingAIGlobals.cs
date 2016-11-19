@@ -44,8 +44,6 @@ public class CraftingAIGlobals : MonoBehaviour {
             m_craftingCompNameToEnemy[enemy.m_deathDropMaterialPrefab.m_craftingName].Remove(enemy);
     }
     
-   
-
     public static GameObject GetClosest(CraftingComponent comp, GameObject you)
     {
         List<CraftingComponent> comps = m_craftingComponents[comp.m_craftingName];

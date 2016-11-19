@@ -31,15 +31,17 @@ public class CraftingRecipe
 }
 
 
-public class CraftingSystem : MonoBehaviour {
-
+public class CraftingSystem : MonoBehaviour
+{
+    public GameObject m_successEffect;
+    public GameObject m_failureEffect;
     public GameObject[] m_baseMaterials;
     public CraftingRecipe[] m_recipes;
     public int m_recipeToMake;
     public string m_missingComponentErrorMessage;
-    void PlayerUseObject(GameObject player)
+    public void PlayerUseObject(GameObject player)
     {
-        
+
         Inventory playersInventory = player.GetComponent<Inventory>();
         GameObject craftingResult = TryToCraft(playersInventory, m_recipeToMake);
         if (craftingResult == null) // crafting failed
@@ -74,7 +76,7 @@ public class CraftingSystem : MonoBehaviour {
                 lateExit = true;
                 int amountNeeded = recipe.m_craftingComponents[i].m_count - materialSource.CountOf(component.GetComponent<CraftingComponent>());
                 m_missingComponentErrorMessage += recipe.m_craftingComponents[i].m_component.m_craftingName + "[" + amountNeeded + "]\n";
-            }   
+            }
         }
 
         if (lateExit)
@@ -93,7 +95,6 @@ public class CraftingSystem : MonoBehaviour {
             }
         }
 
-
         return Instantiate(recipe.m_createdObjectPrefab);
     }
 
@@ -103,7 +104,7 @@ public class CraftingSystem : MonoBehaviour {
         if (recipes.Count == 0)
             return null;
         CraftingRecipe bestRecipe = recipes[0];
-        foreach(CraftingRecipe recipe in recipes) // heuristic test
+        foreach (CraftingRecipe recipe in recipes) // heuristic test
         {
             if (recipe.m_craftingComponents.Count < bestRecipe.m_craftingComponents.Count ||
                 (
@@ -139,10 +140,14 @@ public class CraftingSystem : MonoBehaviour {
         m_recipes[m_recipes.Length - 1] = recipe;
     }
 
-    public void RemoveRecipe(CraftingRecipe recipe)
+    public int RemoveRecipe(int index)
+    {
+        return RemoveRecipe(m_recipes[index]);
+    }
+    public int RemoveRecipe(CraftingRecipe recipe)
     {
         int indexToRemove = 0;
-        for(int i = 0; i < m_recipes.Length; ++i)
+        for (int i = 0; i < m_recipes.Length; ++i)
         {
             if (recipe == m_recipes[i])
                 indexToRemove = i;
@@ -151,7 +156,7 @@ public class CraftingSystem : MonoBehaviour {
         CraftingRecipe[] temp = m_recipes;
         m_recipes = new CraftingRecipe[temp.Length - 1];
         if (m_recipes.Length == 0)
-            return;
+            return -1;
         int recipesIndex = 0;
         for (int tempIndex = 0; tempIndex < temp.Length; ++tempIndex)
         {
@@ -169,13 +174,6 @@ public class CraftingSystem : MonoBehaviour {
             }
 
         }
+        return indexToRemove;
     }
-        // Use this for initialization
-   void Start () {
-    }
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

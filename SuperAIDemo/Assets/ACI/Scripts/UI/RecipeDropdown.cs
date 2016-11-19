@@ -4,21 +4,23 @@ using UnityEngine.UI;
 
 public class RecipeDropdown : MonoBehaviour {
 
-    CraftingSystem myCraftingSystem;
-    Dropdown myDropdown;
+    public bool m_removeDuplicates = false;
+    CraftingSystemTerminal m_myCraftingSystem;
+    Dropdown m_myDropdown;
     // Use this for initialization
     void Start () {
-        myDropdown = GetComponent<Dropdown>();
-        myDropdown.ClearOptions();
-        myCraftingSystem = FindObjectOfType<CraftingSystem>();
+        m_myDropdown = GetComponent<Dropdown>();
+        m_myDropdown.ClearOptions();
+        m_myCraftingSystem = FindObjectOfType<CraftingSystemTerminal>();
         List<string> recipeNames = new List<string>();
-        foreach(CraftingRecipe recipe in myCraftingSystem.m_recipes)
+        foreach(CraftingRecipe recipe in m_myCraftingSystem.m_recipes)
         {
-            string recipeNameAndInfo = recipe.GetName();
-            recipeNames.Add(recipeNameAndInfo);
+            string recipeName = recipe.GetName();
+            if ( !(m_removeDuplicates && recipeNames.Contains(recipeName)) )
+                recipeNames.Add(recipeName);
         }
         //TODO add the option to remove repeat recipes
-        myDropdown.AddOptions(recipeNames);
+        m_myDropdown.AddOptions(recipeNames);
         
     }
 	

@@ -55,10 +55,8 @@ public class CraftingComponent : MonoBehaviour
     void PlayerUseObject(GameObject player)
     {
         GameObject iconInstance = null;
-        if (m_iconPrefab != null)
-            iconInstance = (GameObject)Instantiate(m_iconPrefab, transform.position, transform.rotation);
-        else
-            iconInstance = (GameObject)Instantiate(FindObjectOfType<CraftingAIGlobals>().m_defualtIconPrefab, transform.position, transform.rotation);
+        iconInstance = (GameObject)Instantiate(GetIconPrefab(), transform.position, transform.rotation);
+
         iconInstance.AddComponent<Lifespan>();
         iconInstance.GetComponent<Lifespan>().m_time = 3.0f;
         player.SendMessage("AddToInventory", gameObject);

@@ -44,7 +44,6 @@ public class RecipeManager : EditorWindow
             if (GUILayout.Button("Undo deletion of " + m_undoList[lastElement].GetName() + " recipe") )
             {
                 craftingSystemPrefab.AddRecipe(m_undoList[lastElement]);
-                FindObjectOfType<CraftingSystem>().AddRecipe(m_undoList[lastElement]);
                 m_undoList.RemoveAt(lastElement);
             }
          }
@@ -61,8 +60,7 @@ public class RecipeManager : EditorWindow
         foreach(CraftingRecipe recipe in toRemove)
         {
             m_undoList.Add(recipe);
-            craftingSystemPrefab.RemoveRecipe(recipe);
-            FindObjectOfType<CraftingSystem>().RemoveRecipe(recipe);
+            int removedIndex = craftingSystemPrefab.RemoveRecipe(recipe);
         }
 
     }

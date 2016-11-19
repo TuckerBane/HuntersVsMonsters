@@ -74,7 +74,7 @@ public class PickUpSomething : Action
 public class CraftSomething : Action
 {
     public CraftingRecipe m_recipe;
-    public CraftingSystem m_craftingSystem;
+    public CraftingSystemTerminal m_craftingSystem;
     public override bool DoAction(GameObject actor)
     {
         GameObject newObj = m_craftingSystem.TryToCraft(actor.GetComponent<Inventory>(), m_recipe);
@@ -82,6 +82,8 @@ public class CraftSomething : Action
         if (newObj == null)
         {
             Debug.Log("Crafting attempt failed");
+            // TODO Try another plan instead of giving up. Make sure the resources you need ahead of time.
+            actor.GetComponent<ActionList>().m_objectiveFailed = true;
             return true; // stop trying
         }
 
@@ -158,6 +160,7 @@ public class ActionList : MonoBehaviour {
 
     public List<Action> m_list = new List<Action>();
     public GameObject m_listFinishedEffect;
+    public bool m_objectiveFailed = false;
     private bool m_listWasEmpty = true;
 	// Use this for initialization
 	void Start () {
@@ -170,6 +173,7 @@ public class ActionList : MonoBehaviour {
         // if the list was empty earlier, we don't want to skip the first enter
         if (m_listWasEmpty && m_list.Count > 0)
         {
+            m_objectiveFailed = false;
             m_list[0].OnEnterAction(gameObject);
             m_listWasEmpty = false;
         }
@@ -186,7 +190,8 @@ public class ActionList : MonoBehaviour {
         if (m_list.Count == 0 && !m_listWasEmpty) // if we finished our action chain
         {
             m_listWasEmpty = true;
-            MakeEffectsDisplay();
+            if (!m_objectiveFailed)
+                MakeEffectsDisplay();
         }
 	}
 

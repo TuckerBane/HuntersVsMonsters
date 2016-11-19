@@ -53,7 +53,7 @@ public class PlaningAI : MonoBehaviour {
     public RecipeNode m_goalRootNode;
     public GameObject m_defualtGoal;
 
-    private CraftingSystem m_craftingSystem;
+    private CraftingSystemTerminal m_craftingSystem;
     private ActionList m_myActions;
     private CraftingAIGlobals m_globals;
     private List<RecipeNode> m_recipesForToolsForCurrentPlan = new List<RecipeNode>();
@@ -64,7 +64,7 @@ public class PlaningAI : MonoBehaviour {
     
 	// Use this for initialization
 	void Start () {
-        m_craftingSystem = FindObjectOfType<CraftingSystem>();
+        m_craftingSystem = FindObjectOfType<CraftingSystemTerminal>();
         m_graphDrawer = GetComponent<GraphDrawer>();
         m_myActions = GetComponent<ActionList>();
         m_myInventory = GetComponent<Inventory>();
@@ -72,9 +72,6 @@ public class PlaningAI : MonoBehaviour {
         MakePlan();
 	}
 
-    
-
-    // TODO don't get things we already have (this should be working now, but I'm not 100% sure)
     void MakePlan()
     {
         m_myActions.m_list.Clear();
