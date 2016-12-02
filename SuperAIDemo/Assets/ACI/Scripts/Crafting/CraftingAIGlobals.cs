@@ -8,6 +8,7 @@ public class CraftingAIGlobals : MonoBehaviour {
     // HACK is this something I want?
     //public static Dictionary<string, string> m_materialToEnemy;
     public GameObject m_defualtIconPrefab;
+    public GameObject m_defaultPickupEffect;
     public static void RegisterCraftingComponent( CraftingComponent comp )
     {
         

@@ -19,6 +19,7 @@ public class Health : MonoBehaviour {
     };
 
     public DamageModifiers m_damageModifers = new DamageModifiers();
+    public GameObject m_damgageText;
 
     public int GetDamageModifier(DamageType type)
     {
@@ -63,5 +64,12 @@ public class Health : MonoBehaviour {
         m_health -= message.amount;
         if (m_health <= 0)
             gameObject.SendMessage("DeathMessage");
+
+        if (m_damgageText)
+        {
+            GameObject text =(GameObject)Instantiate(m_damgageText, transform.position + Vector3.up * 10, transform.rotation);
+            text.GetComponent<TextMesh>().text = message.amount.ToString();
+            text.AddComponent<Lifespan>();
+        }
     }
 }

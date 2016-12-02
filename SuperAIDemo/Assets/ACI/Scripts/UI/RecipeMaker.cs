@@ -24,6 +24,7 @@ public class RecipeMaker : EditorWindow
     string[] prefabsWithCraftingComponentsPaths;
     GameObject[] prefabsWithCraftingComponents;
     int selectedCraftingPrefabIndex = 0;
+    int recipeTargetIndex;
 
     // recipe stuff
     CraftingRecipe recipeInProgress = new CraftingRecipe();
@@ -31,6 +32,8 @@ public class RecipeMaker : EditorWindow
     MaterialType matType;
     GameObject craftingTablePrefab;
 
+    // UI
+    string feedback;
 
     // shouldn't need to be here
     List<string> prefabsWithCraftingComponentsPathsList = new List<string>();
@@ -71,9 +74,12 @@ public class RecipeMaker : EditorWindow
         prefabsWithCraftingComponents = prefabsWithCraftingComponentsList.ToArray();
 
         selectedCraftingPrefabIndex = EditorGUILayout.Popup("Selected crafting item", selectedCraftingPrefabIndex, prefabsWithCraftingComponentsPaths);
-        numberOfMaterialNeeded = EditorGUILayout.IntField("number needed", numberOfMaterialNeeded);
+        numberOfMaterialNeeded = EditorGUILayout.IntField("Number needed", numberOfMaterialNeeded);
         if (numberOfMaterialNeeded <= 0)
+        {
+            feedback = "The number of a material that is needed must be at lest 1";
             numberOfMaterialNeeded = 1;
+        }
 
         matType = (MaterialType)EditorGUILayout.EnumPopup("Material Type", matType);
         GUILayout.BeginHorizontal();
@@ -84,25 +90,33 @@ public class RecipeMaker : EditorWindow
             newRequirement.m_count = numberOfMaterialNeeded;
             newRequirement.m_type = matType;
             recipeInProgress.m_craftingComponents.Add(newRequirement);
+            feedback = "Recipe requirement added";
+
+            if (prefabsWithCraftingComponents[recipeTargetIndex].GetComponent<CraftingComponent>()
+                == newRequirement.m_component)
+                feedback += "\nAre you sure you want an object to be made out of itself?";
         }
-        if (GUILayout.Button("Set recipe target", GUILayout.Width(position.width / 2 - 10)))
-        {
-            recipeInProgress.m_createdObjectPrefab = prefabsWithCraftingComponents[selectedCraftingPrefabIndex];
-        }
-        GUILayout.EndHorizontal();
 
         if (GUILayout.Button("Export recipe", GUILayout.Width(position.width / 2 - 10)))
         {
+            recipeInProgress.m_createdObjectPrefab = prefabsWithCraftingComponents[recipeTargetIndex];
             if (recipeInProgress.IsValid())
             {
                 craftingTablePrefab.GetComponent<CraftingSystem>().AddRecipe(recipeInProgress);
                 recipeInProgress = new CraftingRecipe();
+                feedback = "Recipe successfully exported";
             }
             else
+            {
                 Debug.Log("recipes must have a target object and at lest one required material");
+                feedback = "Recipes must have at lest one required material";
+            }
         }
 
-        GUILayout.Label("Recipe object created");
+        GUILayout.EndHorizontal();
+
+        recipeTargetIndex = EditorGUILayout.Popup("Current recipe target", recipeTargetIndex, prefabsWithCraftingComponentsPaths);
+
         if (recipeInProgress.m_createdObjectPrefab)
         {
             if (GUILayout.Button(recipeInProgress.m_createdObjectPrefab.GetComponent<CraftingComponent>().m_craftingName))
@@ -118,6 +132,9 @@ public class RecipeMaker : EditorWindow
         {
             GUILayout.BeginHorizontal();
             CraftingSelectionButton(compCount.m_component);
+            compCount.m_count = EditorGUILayout.IntField(compCount.m_count);
+            compCount.m_type = (MaterialType)EditorGUILayout.EnumPopup("", compCount.m_type);
+           // GUILayout.Label(compCount.m_type.ToString());
             if (GUILayout.Button("Remove from recipe", GUILayout.Width(position.width / 2 - 10)))
             {
                 toRemove.Add(compCount);
@@ -130,6 +147,11 @@ public class RecipeMaker : EditorWindow
         {
             recipeInProgress.m_craftingComponents.Remove(compCount);
         }
+        GUILayout.Label("");
+        GUILayout.Label("");
+        GUILayout.Label(feedback);
+
+
     }
 
 

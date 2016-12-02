@@ -52,13 +52,19 @@ public class CraftingComponent : MonoBehaviour
     #endregion
 
     #region Pickupable
+    public GameObject m_pickupEffect;
     void PlayerUseObject(GameObject player)
     {
         GameObject iconInstance = null;
         iconInstance = (GameObject)Instantiate(GetIconPrefab(), transform.position, transform.rotation);
-
         iconInstance.AddComponent<Lifespan>();
         iconInstance.GetComponent<Lifespan>().m_time = 3.0f;
+
+        if (m_pickupEffect)
+            Instantiate(m_pickupEffect, transform.position, transform.rotation);
+        else
+            Instantiate(FindObjectOfType<CraftingAIGlobals>().m_defaultPickupEffect, transform.position, transform.rotation);
+
         player.SendMessage("AddToInventory", gameObject);
     }
     #endregion

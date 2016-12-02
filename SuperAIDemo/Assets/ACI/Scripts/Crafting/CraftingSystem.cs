@@ -160,15 +160,14 @@ public class CraftingSystem : MonoBehaviour
         int recipesIndex = 0;
         for (int tempIndex = 0; tempIndex < temp.Length; ++tempIndex)
         {
-            if (recipesIndex == m_recipes.Length)
-            {
-                m_recipes = temp;
-                Debug.Log("Recipe to remove not found");
-                break;
-            }
-
             if (tempIndex != indexToRemove)
             {
+                if (recipesIndex == m_recipes.Length)
+                {
+                    m_recipes = temp;
+                    Debug.Log("Recipe to remove not found");
+                    break;
+                }
                 m_recipes[recipesIndex] = temp[tempIndex];
                 ++recipesIndex;
             }

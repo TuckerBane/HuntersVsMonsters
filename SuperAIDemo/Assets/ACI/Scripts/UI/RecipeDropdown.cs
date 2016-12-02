@@ -8,7 +8,7 @@ public class RecipeDropdown : MonoBehaviour {
     CraftingSystemTerminal m_myCraftingSystem;
     Dropdown m_myDropdown;
     // Use this for initialization
-    void Start () {
+    void OnEnable () {
         m_myDropdown = GetComponent<Dropdown>();
         m_myDropdown.ClearOptions();
         m_myCraftingSystem = FindObjectOfType<CraftingSystemTerminal>();

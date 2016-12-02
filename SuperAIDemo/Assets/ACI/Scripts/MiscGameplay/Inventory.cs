@@ -10,7 +10,8 @@ public class Inventory : MonoBehaviour
 
     public Inventory DeepCopy()
     {
-       
+//TODO find this warning code
+//#pragma warning disable xxxx
         Inventory newInventory = new Inventory();
         newInventory.m_objectStore = new List<GameObject>();
         foreach (GameObject obj in m_objectStore)
