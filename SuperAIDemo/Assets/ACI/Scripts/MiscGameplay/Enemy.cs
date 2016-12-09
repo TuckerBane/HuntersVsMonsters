@@ -17,7 +17,7 @@ public class Enemy : MonoBehaviour {
 
     public void DeathMessage()
     {
-        Instantiate(m_deathDropMaterialPrefab);
+        Instantiate(m_deathDropMaterialPrefab, transform.position + Vector3.left * 20, transform.rotation);
         Destroy(gameObject);
     }
 

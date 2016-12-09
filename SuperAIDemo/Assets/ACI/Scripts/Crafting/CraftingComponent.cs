@@ -59,6 +59,7 @@ public class CraftingComponent : MonoBehaviour
         iconInstance = (GameObject)Instantiate(GetIconPrefab(), transform.position, transform.rotation);
         iconInstance.AddComponent<Lifespan>();
         iconInstance.GetComponent<Lifespan>().m_time = 3.0f;
+        iconInstance.AddComponent<FacePlayer>();
 
         if (m_pickupEffect)
             Instantiate(m_pickupEffect, transform.position, transform.rotation);

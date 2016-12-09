@@ -24,7 +24,7 @@ public class CraftingSystemTerminal : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
+    void Awake () {
         GameObject craftingSystem = UIHelpers.GetAllPrefabsWithComponent<CraftingSystem>()[0];
         m_craftingSystemPrefab = craftingSystem.GetComponent<CraftingSystem>();
     }

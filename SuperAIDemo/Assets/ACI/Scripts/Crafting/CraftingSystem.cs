@@ -61,6 +61,12 @@ public class CraftingSystem : MonoBehaviour
     public GameObject TryToCraft(Inventory materialSource, CraftingRecipe recipe,
         bool missingComponentErrorMessage = false)
     {
+        if (materialSource == null)
+        {
+            Debug.Log("Crafting system given a null inventory");
+            return null;
+        }
+
         if (missingComponentErrorMessage)
             m_missingComponentErrorMessage = "";
 

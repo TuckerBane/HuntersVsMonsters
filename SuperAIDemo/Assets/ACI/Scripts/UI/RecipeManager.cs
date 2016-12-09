@@ -47,14 +47,39 @@ public class RecipeManager : EditorWindow
                 m_undoList.RemoveAt(lastElement);
             }
          }
-        foreach (CraftingRecipe recipe in craftingSystemPrefab.m_recipes)
+
+        for (int i = 0; i < craftingSystemPrefab.m_recipes.Length; ++i)
         {
+            CraftingRecipe recipe = craftingSystemPrefab.m_recipes[i];
             string recipeName = recipe.m_createdObjectPrefab.GetComponent<CraftingComponent>().m_craftingName;
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label(recipeName);
+
+            if (GUILayout.Button("Move Up"))
+            {
+                if (i == 0)
+                    continue;
+                CraftingRecipe swappy = recipe;
+                craftingSystemPrefab.m_recipes[i] = craftingSystemPrefab.m_recipes[i - 1];
+                craftingSystemPrefab.m_recipes[i - 1] = swappy;
+            }
+
+            if (GUILayout.Button("Move Down"))
+            {
+                if (i == craftingSystemPrefab.m_recipes.Length - 1)
+                    continue;
+                CraftingRecipe swappy = recipe;
+                craftingSystemPrefab.m_recipes[i] = craftingSystemPrefab.m_recipes[i + 1];
+                craftingSystemPrefab.m_recipes[i + 1] = swappy;
+            }
+
 
             if (GUILayout.Button("Delete " + recipeName + " recipe") )
             {
                 toRemove.Add(recipe);
             }
+            GUILayout.EndHorizontal();
         }
 
         foreach(CraftingRecipe recipe in toRemove)

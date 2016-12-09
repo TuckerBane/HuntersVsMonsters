@@ -52,6 +52,8 @@ public class Drop : Action
      public override bool DoAction(GameObject actor)
     {
         actor.GetComponent<Inventory>().PlaceObject();
+        if (!actor.GetComponent<ActionList>().m_objectiveFailed)
+            actor.GetComponent<ActionList>().MakeEffectsDisplay();
         return true;
     }
 }
@@ -87,7 +89,9 @@ public class CraftSomething : Action
             return true; // stop trying
         }
 
-        newObj.SendMessage("PlayerUseObject", actor);
+        actor.GetComponent<Inventory>().m_objectStore.Add(newObj);
+        newObj.SetActive(false);
+        //newObj.SendMessage("PlayerUseObject", actor);
         return true;
     }
 }
@@ -190,12 +194,10 @@ public class ActionList : MonoBehaviour {
         if (m_list.Count == 0 && !m_listWasEmpty) // if we finished our action chain
         {
             m_listWasEmpty = true;
-            if (!m_objectiveFailed)
-                MakeEffectsDisplay();
         }
 	}
 
-    void MakeEffectsDisplay()
+    public void MakeEffectsDisplay()
     {
         GameObject effectIJustMade = (GameObject) Instantiate(m_listFinishedEffect,transform,false);
         effectIJustMade.transform.localPosition = Vector3.up * 1;

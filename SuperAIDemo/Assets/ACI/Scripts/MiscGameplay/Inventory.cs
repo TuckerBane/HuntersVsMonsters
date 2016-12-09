@@ -41,7 +41,7 @@ public class Inventory : MonoBehaviour
 
     public void PlaceObject(GameObject obj)
     {
-        obj.GetComponent<Transform>().position = GetComponent<Transform>().position + (GetComponent<Transform>().rotation * Vector3.forward * m_objectPlaceDistance);
+        obj.GetComponent<Transform>().position = transform.position + (GetComponent<Transform>().rotation * Vector3.forward * m_objectPlaceDistance);
     }
 
     public void PlaceObject()

@@ -6,10 +6,12 @@ public class CraftingUIManager : MonoBehaviour {
 
     public Dropdown m_recipeSelector;
     public Dropdown m_AIObjectiveSelector;
+    public Dropdown m_objectSpawnSelector;
     public PlaningAI m_AIBot;
     public Inventory m_playersInventory;
     public Text m_errorReadout;
     public Text m_inventoryReadout;
+    public GameObject m_spawnEffect;
 
     private CraftingSystemTerminal m_craftingSystem;
     public void TryToCraft()
@@ -32,6 +34,20 @@ public class CraftingUIManager : MonoBehaviour {
         int recipeIndex = m_AIObjectiveSelector.value;
         CraftingRecipe recp = m_craftingSystem.m_recipes[recipeIndex];
         m_AIBot.M_objectivePrefab = recp.m_createdObjectPrefab;
+    }
+
+    public void SpawnSelected()
+    {
+        GameObject[] allOptions = UIHelpers.GetAllPrefabsWithComponent<CraftingComponent>();
+        GameObject toSpawn = allOptions[m_objectSpawnSelector.value];
+        GameObject spawned = Instantiate(toSpawn);
+        FindObjectOfType<CharacterController>().gameObject.GetComponent<Inventory>().PlaceObject(spawned);
+        if (m_spawnEffect)
+        {
+            GameObject effect = Instantiate(m_spawnEffect);
+            effect.transform.position = spawned.transform.position;
+            //FindObjectOfType<CharacterController>().gameObject.GetComponent<Inventory>().PlaceObject(m_spawnEffect);
+        }
     }
 
 	// Use this for initialization
