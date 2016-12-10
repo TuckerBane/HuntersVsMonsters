@@ -10,6 +10,7 @@ public class RecipeNode
     // lack of pointers/references makes me sad
     public List<int> m_requiredRecipeNodeIndexes = new List<int>();
     public List<ComponentAndCount> m_requiredBasicMaterials = new List<ComponentAndCount>();
+    public List<GameObject> m_basicMaterialIcons = new List<GameObject>();
     public int m_reasonForExistingRecipeNodeIndex = -1;
     public int m_myRecipeNodeIndex = -1;
     public GameObject m_graphicsIcon = null;
@@ -275,14 +276,14 @@ public class PlaningAI : MonoBehaviour
         }
         else if (m_currentNode.m_requiredBasicMaterials.Count > 0) // collect things
         {
-            if (m_currentNode != null && m_currentNode.m_graphicsIcon != null)
-            {
-                m_planLight.GetComponent<GoToObject>().m_target = m_currentNode.m_graphicsIcon;
-            }
 
             int index = m_currentNode.m_requiredBasicMaterials.Count - 1;
             ComponentAndCount componentCount = m_currentNode.m_requiredBasicMaterials[index];
             m_currentNode.m_requiredBasicMaterials.RemoveAt(index);
+
+            m_planLight.GetComponent<GoToObject>().m_target = m_currentNode.m_basicMaterialIcons[index];
+            RecursiveColorSet(m_goalRootNode, new Color(0.3f, 0.3f, 0.3f, 0.3f));
+            RecursiveColorSet(m_currentNode, Color.white);
 
             if (componentCount.m_type == MaterialType.EnemyDrop)
             {
@@ -314,6 +315,8 @@ public class PlaningAI : MonoBehaviour
             if (m_currentNode != null && m_currentNode.m_graphicsIcon != null)
             {
                 m_planLight.GetComponent<GoToObject>().m_target = m_currentNode.m_graphicsIcon;
+                RecursiveColorSet(m_goalRootNode, new Color(0.3f, 0.3f, 0.3f, 0.3f));
+                RecursiveColorSet(m_currentNode, Color.white);
             }
 
             GoSomewhere go = new GoSomewhere();
@@ -358,6 +361,7 @@ public class PlaningAI : MonoBehaviour
         GameObject startingIcon = m_graphDrawer.PutSymbolAtPos(GetNodeIcon(goalRootNode), currentNodePosition);
         goalRootNode.m_graphicsIcon = startingIcon;
         RecursiveGraphDraw(startingIcon, currentNodePosition, goalRootNode);
+        RecursiveColorSet(m_goalRootNode, new Color(0.3f, 0.3f, 0.3f, 0.3f));
     }
 
     void RecursiveGraphDraw(GameObject prevIcon, Vector3 prevIconPosition, RecipeNode prevNode, float nodeSeperation = 10)
@@ -378,15 +382,32 @@ public class PlaningAI : MonoBehaviour
             newPosition += new Vector3(nodeSeperation, 0, 0);
         }
 
+        prevNode.m_basicMaterialIcons.Clear();
+
         foreach (ComponentAndCount comp in prevNode.m_requiredBasicMaterials)
         {
             GameObject newIconPrefab = comp.m_component .GetIconPrefab();
             GameObject newIcon = m_graphDrawer.PutSymbolAtPos(newIconPrefab, newPosition);
+            prevNode.m_basicMaterialIcons.Add(newIcon);
             m_graphDrawer.DrawArrowBetweenThings(newIcon, prevIcon);
             //RecursiveGraphDraw(newIcon, newPosition, currentNode, nodeSeperation / 2);
             newPosition += new Vector3(nodeSeperation, 0, 0);
         }
 
+
+    }
+
+    void RecursiveColorSet(RecipeNode node, Color newColor)
+    {
+        node.m_graphicsIcon.GetComponent<SpriteRenderer>().material.color = newColor;
+        foreach(GameObject icon in node.m_basicMaterialIcons)
+        {
+            icon.GetComponent<SpriteRenderer>().material.color = newColor;
+        }
+        foreach(int nodeIndex in node.m_requiredRecipeNodeIndexes)
+        {
+            RecursiveColorSet(m_recipeNodes[nodeIndex], newColor);
+        }
 
     }
 
